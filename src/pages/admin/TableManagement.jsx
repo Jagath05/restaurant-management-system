@@ -26,7 +26,7 @@ async () => {
 
 const response =
 await fetch(
-"https://restaurant-jagath.infinityfreeapp.com/restaurant-api/tables/getTables.php"
+"/api/tables/getTables.php"
 );
 
 const data =
@@ -44,7 +44,7 @@ status
 ) => {
 
 await fetch(
-"https://restaurant-jagath.infinityfreeapp.com/restaurant-api/tables/updateTableStatus.php",
+"/api/tables/updateTableStatus.php",
 {
 method:"POST",
 headers:{

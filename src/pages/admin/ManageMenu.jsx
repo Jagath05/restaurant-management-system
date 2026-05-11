@@ -9,7 +9,7 @@ from "../../layout/AdminLayout";
 export default function ManageMenu() {
 
     const API_BASE =
-        "https://restaurant-jagath.infinityfreeapp.com/restaurant-api";
+        "/api";
 
     const [food, setFood] =
         useState({

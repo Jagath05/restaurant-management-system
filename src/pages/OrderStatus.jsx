@@ -58,7 +58,7 @@ try {
 
 const response =
 await fetch(
-`https://restaurant-jagath.infinityfreeapp.com/restaurant-api/orders/getCustomerOrderStatus.php?tableNumber=${tableNumber}`
+`/api/orders/getCustomerOrderStatus.php?tableNumber=${tableNumber}`
 );
 
 const data =

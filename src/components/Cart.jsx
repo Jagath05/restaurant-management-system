@@ -77,7 +77,7 @@ setLoading(true);
 
 const response =
 await fetch(
-"https://restaurant-jagath.infinityfreeapp.com/restaurant-api/orders/placeOrder.php",
+"/api/orders/placeOrder.php",
 {
 method: "POST",
 headers: {
@@ -217,7 +217,7 @@ className="bg-white/5 border border-white/10 rounded-3xl p-4"
 >
 
 <img
-src={`https://restaurant-jagath.infinityfreeapp.com/restaurant-api/uploads/images/${item.image}`}
+src={`/api/uploads/images/${item.image}`}
 alt=""
 className="w-full h-40 rounded-2xl object-cover"
 />

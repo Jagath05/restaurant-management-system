@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "https://restaurant-jagath.infinityfreeapp.com/restaurant-api/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

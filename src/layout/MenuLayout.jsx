@@ -42,7 +42,7 @@ export default function MenuLayout({
 
             const response =
                 await fetch(
-                    `https://restaurant-jagath.infinityfreeapp.com/restaurant-api/menu/getCustomerFoods.php?category=${meal}`
+                    `/getCustomerFoods.php?category=${meal}`
                 );
 
             const data =
