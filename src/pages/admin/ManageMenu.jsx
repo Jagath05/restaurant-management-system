@@ -8,6 +8,9 @@ from "../../layout/AdminLayout";
 
 export default function ManageMenu() {
 
+    const API_BASE =
+        "https://restaurant-jagath.infinityfreeapp.com/restaurant-api";
+
     const [food, setFood] =
         useState({
             food_name: "",
@@ -23,6 +26,9 @@ export default function ManageMenu() {
 
     const [editId, setEditId] =
         useState(null);
+
+    const [loading, setLoading] =
+        useState(false);
 
     // Input Change
     const handleChange =
@@ -50,15 +56,38 @@ export default function ManageMenu() {
     const fetchFoods =
         async () => {
 
-        const response =
-            await fetch(
-                "https://restaurant-jagath.infinityfreeapp.com/restaurant-api/menu/getFoods.php"
+        try {
+
+            const response =
+                await fetch(
+                    `${API_BASE}/menu/getFoods.php`
+                );
+
+            const text =
+                await response.text();
+
+            console.log(
+                "Foods API:",
+                text
             );
 
-        const data =
-            await response.json();
+            const data =
+                JSON.parse(text);
 
-        setFoods(data);
+            setFoods(
+                Array.isArray(data)
+                ? data
+                : []
+            );
+
+        } catch(error){
+
+            console.log(error);
+
+            alert(
+                "Failed to load menu"
+            );
+        }
     };
 
     useEffect(() => {
@@ -73,7 +102,22 @@ export default function ManageMenu() {
 
         e.preventDefault();
 
+        if(
+            !food.food_name ||
+            !food.category ||
+            !food.price
+        ){
+
+            alert(
+                "Please fill required fields"
+            );
+
+            return;
+        }
+
         try {
+
+            setLoading(true);
 
             const formData =
                 new FormData();
@@ -113,8 +157,8 @@ export default function ManageMenu() {
 
             const apiURL =
                 editId
-                ? "https://restaurant-jagath.infinityfreeapp.com/restaurant-api/menu/updateFood.php"
-                : "https://restaurant-jagath.infinityfreeapp.com/restaurant-api/menu/addFood.php";
+                ? `${API_BASE}/menu/updateFood.php`
+                : `${API_BASE}/menu/addFood.php`;
 
             if(editId){
 
@@ -128,41 +172,78 @@ export default function ManageMenu() {
                 await fetch(
                     apiURL,
                     {
-                        method:
-                            "POST",
-                        body:
-                            formData
+                        method: "POST",
+                        body: formData
                     }
                 );
 
-            const data =
-                await response.json();
+            const text =
+                await response.text();
 
-            alert(
-                data.message
+            console.log(
+                "Submit API:",
+                text
             );
 
-            fetchFoods();
+            let data;
 
-            // Reset
-            setFood({
-                food_name: "",
-                category: "",
-                section: "",
-                food_type: "",
-                price: "",
-                image: null
-            });
+            try {
 
-            setEditId(null);
+                data =
+                    JSON.parse(text);
+
+            } catch {
+
+                alert(
+                    "Backend Error:\n" +
+                    text
+                );
+
+                return;
+            }
+
+            if(data.success){
+
+                alert(
+                    editId
+                    ? "Dish Updated Successfully 🎉"
+                    : "Food Added Successfully 🎉"
+                );
+
+                // Reset form
+                setFood({
+                    food_name: "",
+                    category: "",
+                    section: "",
+                    food_type: "",
+                    price: "",
+                    image: null
+                });
+
+                setEditId(null);
+
+                fetchFoods();
+
+            } else {
+
+                alert(
+                    data.message ||
+                    "Failed"
+                );
+            }
 
         } catch(error){
 
             console.log(error);
 
             alert(
-                "Server Error"
+                "Server Error: " +
+                error.message
             );
+
+        } finally {
+
+            setLoading(false);
         }
     };
 
@@ -171,18 +252,33 @@ export default function ManageMenu() {
         async (id) => {
 
         const confirmDelete =
-            confirm(
+            window.confirm(
                 "Delete this food?"
             );
 
         if(!confirmDelete)
             return;
 
-        await fetch(
-            `https://restaurant-jagath.infinityfreeapp.com/restaurant-api/menu/deleteFood.php?id=${id}`
-        );
+        try {
 
-        fetchFoods();
+            await fetch(
+                `${API_BASE}/menu/deleteFood.php?id=${id}`
+            );
+
+            alert(
+                "Food Deleted"
+            );
+
+            fetchFoods();
+
+        } catch(error){
+
+            console.log(error);
+
+            alert(
+                "Delete Failed"
+            );
+        }
     };
 
     // Edit Food
@@ -226,38 +322,30 @@ export default function ManageMenu() {
 
             <div>
 
-                {/* Heading */}
-                <h1 className="text-white text-6xl font-bold">
+                <h1 className="text-white text-5xl font-bold">
 
                     Manage Menu
 
                 </h1>
 
-                <p className="text-gray-400 mt-3 text-xl">
+                <p className="text-gray-400 mt-3 text-lg">
 
-                    Add food dishes
-                    for customers
+                    Add food dishes for customers
 
                 </p>
 
-                {/* Form */}
+                {/* FORM */}
                 <form
-                    onSubmit={
-                        handleSubmit
-                    }
-                    className="grid grid-cols-2 gap-6 mt-12 bg-white/5 border border-white/10 rounded-[35px] p-10 backdrop-blur-xl"
+                    onSubmit={handleSubmit}
+                    className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10 bg-white/5 border border-white/10 rounded-[35px] p-8 backdrop-blur-xl"
                 >
 
                     <input
                         type="text"
                         name="food_name"
                         placeholder="Food Name"
-                        value={
-                            food.food_name
-                        }
-                        onChange={
-                            handleChange
-                        }
+                        value={food.food_name}
+                        onChange={handleChange}
                         className="bg-[#312B45] border border-white/10 rounded-2xl p-5 text-white outline-none"
                     />
 
@@ -265,116 +353,68 @@ export default function ManageMenu() {
                         type="number"
                         name="price"
                         placeholder="Price"
-                        value={
-                            food.price
-                        }
-                        onChange={
-                            handleChange
-                        }
+                        value={food.price}
+                        onChange={handleChange}
                         className="bg-[#312B45] border border-white/10 rounded-2xl p-5 text-white outline-none"
                     />
 
                     <select
                         name="category"
-                        value={
-                            food.category
-                        }
-                        onChange={
-                            handleChange
-                        }
+                        value={food.category}
+                        onChange={handleChange}
                         className="bg-[#312B45] border border-white/10 rounded-2xl p-5 text-white"
                     >
                         <option value="">
                             Select Category
                         </option>
-
-                        <option>
-                            Breakfast
-                        </option>
-
-                        <option>
-                            Lunch
-                        </option>
-
-                        <option>
-                            Dinner
-                        </option>
-
-                        <option>
-                            Drinks
-                        </option>
-
-                        <option>
-                            Desserts
-                        </option>
-
+                        <option>Breakfast</option>
+                        <option>Lunch</option>
+                        <option>Dinner</option>
+                        <option>Drinks</option>
+                        <option>Desserts</option>
                     </select>
 
                     <select
                         name="section"
-                        value={
-                            food.section
-                        }
-                        onChange={
-                            handleChange
-                        }
+                        value={food.section}
+                        onChange={handleChange}
                         className="bg-[#312B45] border border-white/10 rounded-2xl p-5 text-white"
                     >
                         <option value="">
                             Select Section
                         </option>
-
-                        <option>
-                            Starter
-                        </option>
-
-                        <option>
-                            Main Course
-                        </option>
-
-                        <option>
-                            Side Dish
-                        </option>
-
+                        <option>Starter</option>
+                        <option>Main Course</option>
+                        <option>Side Dish</option>
                     </select>
 
                     <select
                         name="food_type"
-                        value={
-                            food.food_type
-                        }
-                        onChange={
-                            handleChange
-                        }
+                        value={food.food_type}
+                        onChange={handleChange}
                         className="bg-[#312B45] border border-white/10 rounded-2xl p-5 text-white"
                     >
                         <option value="">
                             Select Type
                         </option>
-
-                        <option>
-                            Veg
-                        </option>
-
-                        <option>
-                            Non-Veg
-                        </option>
-
+                        <option>Veg</option>
+                        <option>Non-Veg</option>
                     </select>
 
                     <input
                         type="file"
-                        onChange={
-                            handleImage
-                        }
+                        onChange={handleImage}
                         className="bg-[#312B45] border border-white/10 rounded-2xl p-5 text-white"
                     />
 
                     <button
-                        className="col-span-2 bg-violet-600 hover:bg-violet-700 py-5 rounded-2xl text-white text-xl font-bold duration-300"
+                        disabled={loading}
+                        className="col-span-1 md:col-span-2 bg-violet-600 hover:bg-violet-700 py-5 rounded-2xl text-white text-xl font-bold duration-300"
                     >
                         {
-                            editId
+                            loading
+                            ? "Processing..."
+                            : editId
                             ? "Update Dish"
                             : "Add Dish"
                         }
@@ -382,7 +422,7 @@ export default function ManageMenu() {
 
                 </form>
 
-                {/* Food List */}
+                {/* FOOD LIST */}
                 <div className="mt-16">
 
                     <h1 className="text-white text-4xl font-bold mb-8">
@@ -391,11 +431,10 @@ export default function ManageMenu() {
 
                     </h1>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
 
                         {
-                            foods.map(
-                                (item) => (
+                            foods.map((item) => (
 
                                 <div
                                     key={item.id}
@@ -403,7 +442,7 @@ export default function ManageMenu() {
                                 >
 
                                     <img
-                                        src={`https://restaurant-jagath.infinityfreeapp.com/restaurant-api/uploads/images/${item.image}`}
+                                        src={`${API_BASE}/uploads/images/${item.image}`}
                                         alt=""
                                         className="w-full h-56 object-cover"
                                     />
