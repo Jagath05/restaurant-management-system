@@ -29,7 +29,7 @@ export default function AdminLogin() {
 
         const response =
             await fetch(
-                "http://localhost/restaurant-api/admin/login.php",
+                "https://restaurant-jagath.infinityfreeapp.com/restaurant-api/admin/login.php",
                 {
                     method: "POST",
                     headers: {

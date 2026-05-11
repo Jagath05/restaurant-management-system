@@ -36,7 +36,7 @@ export default function FoodCard({
             <div className="overflow-hidden">
 
                 <img
-                    src={`http://localhost/restaurant-api/uploads/images/${item.image}`}
+                    src={`https://restaurant-jagath.infinityfreeapp.com/restaurant-api/uploads/images/${item.image}`}
                     alt=""
                     className="w-full h-65 object-cover hover:scale-110 duration-700"
                 />

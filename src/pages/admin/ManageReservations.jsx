@@ -34,7 +34,7 @@ export default function ManageReservations() {
 
             const response =
                 await fetch(
-"http://localhost/restaurant-api/reservations/getReservations.php"
+"https://restaurant-jagath.infinityfreeapp.com/restaurant-api/reservations/getReservations.php"
                 );
 
             const data =
@@ -81,7 +81,7 @@ export default function ManageReservations() {
 
             const response =
                 await fetch(
-"http://localhost/restaurant-api/reservations/updateReservationStatus.php",
+"https://restaurant-jagath.infinityfreeapp.com/restaurant-api/reservations/updateReservationStatus.php",
                     {
                         method:
                         "POST",

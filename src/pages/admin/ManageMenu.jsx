@@ -52,7 +52,7 @@ export default function ManageMenu() {
 
         const response =
             await fetch(
-                "http://localhost/restaurant-api/menu/getFoods.php"
+                "https://restaurant-jagath.infinityfreeapp.com/restaurant-api/menu/getFoods.php"
             );
 
         const data =
@@ -113,8 +113,8 @@ export default function ManageMenu() {
 
             const apiURL =
                 editId
-                ? "http://localhost/restaurant-api/menu/updateFood.php"
-                : "http://localhost/restaurant-api/menu/addFood.php";
+                ? "https://restaurant-jagath.infinityfreeapp.com/restaurant-api/menu/updateFood.php"
+                : "https://restaurant-jagath.infinityfreeapp.com/restaurant-api/menu/addFood.php";
 
             if(editId){
 
@@ -179,7 +179,7 @@ export default function ManageMenu() {
             return;
 
         await fetch(
-            `http://localhost/restaurant-api/menu/deleteFood.php?id=${id}`
+            `https://restaurant-jagath.infinityfreeapp.com/restaurant-api/menu/deleteFood.php?id=${id}`
         );
 
         fetchFoods();
@@ -403,7 +403,7 @@ export default function ManageMenu() {
                                 >
 
                                     <img
-                                        src={`http://localhost/restaurant-api/uploads/images/${item.image}`}
+                                        src={`https://restaurant-jagath.infinityfreeapp.com/restaurant-api/uploads/images/${item.image}`}
                                         alt=""
                                         className="w-full h-56 object-cover"
                                     />

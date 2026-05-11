@@ -23,7 +23,7 @@ async () => {
 
 const response =
 await fetch(
-"http://localhost/restaurant-api/orders/getOrders.php"
+"https://restaurant-jagath.infinityfreeapp.com/restaurant-api/orders/getOrders.php"
 );
 
 const data =
@@ -40,7 +40,7 @@ status
 ) => {
 
 await fetch(
-"http://localhost/restaurant-api/orders/updateOrderStatus.php",
+"https://restaurant-jagath.infinityfreeapp.com/restaurant-api/orders/updateOrderStatus.php",
 {
 method:"POST",
 headers:{
