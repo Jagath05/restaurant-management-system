@@ -27,35 +27,40 @@ export default function AdminLogin() {
 
         e.preventDefault();
 
-        const response =
-            await fetch(
-                "https://restaurant-jagath.infinityfreeapp.com/restaurant-api/admin/login.php",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-                    body: JSON.stringify(form)
-                }
-            );
+        const response = await fetch(
+"https://restaurant-jagath.infinityfreeapp.com/restaurant-api/admin/login.php",
+{
+method: "POST",
+headers: {
+Accept: "application/json"
+},
+body: JSON.stringify({
+username,
+password
+})
+}
+);
 
-        const data =
-            await response.json();
+const data = await response.json();
 
-        setMessage(data.message);
+console.log(data);
 
-        if(data.success){
+if(data.success){
 
-            localStorage.setItem(
-                "admin",
-                "true"
-            );
+localStorage.setItem(
+"admin",
+JSON.stringify(data.admin)
+);
 
-            navigate(
-                "/dashboard"
-            );
-        }
+navigate("/dashboard");
+
+}else{
+
+alert(
+data.message
+);
+
+}
     };
 
     return (

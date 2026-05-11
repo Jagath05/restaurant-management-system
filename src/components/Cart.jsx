@@ -145,7 +145,7 @@ alert(
 
 return (
 
-<div className="fixed top-0 right-0 h-screen w-[450px] bg-[#262235] border-l border-white/10 z-[99999] shadow-2xl p-6 overflow-y-auto">
+<div className="fixed top-0 right-0 h-screen w-112.5 bg-[#262235] border-l border-white/10 z-99999 shadow-2xl p-6 overflow-y-auto">
 
 <div className="flex justify-between items-center mb-8">
 
