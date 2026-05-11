@@ -1,18 +1,11 @@
-// MenuLayout.jsx
-
 import React, {
     useEffect,
     useState
 } from "react";
 
-import FoodCard
-from "../components/FoodCard";
-
-import Cart
-from "../components/Cart";
-
-import Navbar
-from "../components/Navbar";
+import FoodCard from "../components/FoodCard";
+import Cart from "../components/Cart";
+import Navbar from "../components/Navbar";
 
 import {
     useNavigate
@@ -28,6 +21,13 @@ export default function MenuLayout({
     const [foods, setFoods] =
         useState([]);
 
+    const [loading,
+        setLoading] =
+        useState(true);
+
+    const API_BASE =
+        "/restaurant-api";
+
     // Fetch Foods
     useEffect(() => {
 
@@ -40,17 +40,53 @@ export default function MenuLayout({
 
         try {
 
+            setLoading(true);
+
             const response =
                 await fetch(
-                    `/getCustomerFoods.php?category=${meal}`
+                    `${API_BASE}/menu/getFoods.php`
                 );
 
-            const data =
-                await response.json();
+            const text =
+                await response.text();
 
-            console.log(data);
+            console.log(
+                "Foods API:",
+                text
+            );
 
-            setFoods(data);
+            let data = [];
+
+            try {
+
+                data =
+                    JSON.parse(text);
+
+            } catch {
+
+                console.log(
+                    "Invalid JSON:",
+                    text
+                );
+
+                return;
+            }
+
+            // Filter by category
+            const filteredFoods =
+                Array.isArray(data)
+
+                    ? data.filter(
+                        item =>
+                            item.category ===
+                            meal
+                    )
+
+                    : [];
+
+            setFoods(
+                filteredFoods
+            );
 
         } catch (error) {
 
@@ -58,6 +94,10 @@ export default function MenuLayout({
                 "Fetch Error:",
                 error
             );
+
+        } finally {
+
+            setLoading(false);
         }
     };
 
@@ -111,7 +151,6 @@ export default function MenuLayout({
 
                     </div>
 
-                    {/* Back */}
                     <button
                         onClick={() =>
                             navigate("/")
@@ -125,165 +164,187 @@ export default function MenuLayout({
 
                 </div>
 
+                {/* Loading */}
+                {
+                    loading && (
+
+                        <div className="text-center">
+
+                            <h2 className="text-white text-3xl">
+
+                                Loading Menu...
+
+                            </h2>
+
+                        </div>
+                    )
+                }
+
                 {/* Main Layout */}
-                <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
+                {
+                    !loading && (
 
-                    {/* LEFT SIDE */}
-                    <div className="xl:col-span-8">
+                        <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
 
-                        {
-                            meal === "Breakfast" ||
-                            meal === "Lunch" ||
-                            meal === "Dinner"
+                            {/* LEFT SIDE */}
+                            <div className="xl:col-span-8">
 
-                                ? (
+                                {
+                                    meal ===
+                                        "Breakfast" ||
+                                    meal ===
+                                        "Lunch" ||
+                                    meal ===
+                                        "Dinner"
 
-                                    <>
+                                        ? (
 
-                                        {/* Starter */}
-                                        {
-                                            starters.length > 0 && (
+                                            <>
 
-                                                <>
-                                                    <h2 className="text-white text-[35px] md:text-[45px] font-bold mb-8">
+                                                {/* Starter */}
+                                                {
+                                                    starters.length > 0 && (
 
-                                                        Starters
+                                                        <>
+                                                            <h2 className="text-white text-[35px] md:text-[45px] font-bold mb-8">
 
-                                                    </h2>
+                                                                Starters
 
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+                                                            </h2>
 
-                                                        {
-                                                            starters.map(
-                                                                item => (
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
 
-                                                                    <FoodCard
-                                                                        key={item.id}
-                                                                        item={item}
-                                                                    />
-                                                                )
-                                                            )
-                                                        }
+                                                                {
+                                                                    starters.map(
+                                                                        item => (
 
-                                                    </div>
-                                                </>
-                                            )
-                                        }
+                                                                            <FoodCard
+                                                                                key={item.id}
+                                                                                item={item}
+                                                                            />
+                                                                        )
+                                                                    )
+                                                                }
 
-                                        {/* Main Course */}
-                                        {
-                                            mainCourse.length > 0 && (
-
-                                                <>
-                                                    <h2 className="text-white text-[35px] md:text-[45px] font-bold mb-8">
-
-                                                        Main Course
-
-                                                    </h2>
-
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-
-                                                        {
-                                                            mainCourse.map(
-                                                                item => (
-
-                                                                    <FoodCard
-                                                                        key={item.id}
-                                                                        item={item}
-                                                                    />
-                                                                )
-                                                            )
-                                                        }
-
-                                                    </div>
-                                                </>
-                                            )
-                                        }
-
-                                        {/* Side Dish */}
-                                        {
-                                            sideDish.length > 0 && (
-
-                                                <>
-                                                    <h2 className="text-white text-[35px] md:text-[45px] font-bold mb-8">
-
-                                                        Side Dish
-
-                                                    </h2>
-
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-
-                                                        {
-                                                            sideDish.map(
-                                                                item => (
-
-                                                                    <FoodCard
-                                                                        key={item.id}
-                                                                        item={item}
-                                                                    />
-                                                                )
-                                                            )
-                                                        }
-
-                                                    </div>
-                                                </>
-                                            )
-                                        }
-
-                                        {
-                                            foods.length === 0 && (
-
-                                                <h2 className="text-gray-400 text-3xl">
-
-                                                    No Foods Added Yet
-
-                                                </h2>
-                                            )
-                                        }
-
-                                    </>
-
-                                )
-
-                                : (
-
-                                    /* Drinks + Desserts */
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-
-                                        {
-                                            foods.length > 0
-
-                                                ? foods.map(
-                                                    item => (
-
-                                                        <FoodCard
-                                                            key={item.id}
-                                                            item={item}
-                                                        />
+                                                            </div>
+                                                        </>
                                                     )
-                                                )
+                                                }
 
-                                                : (
+                                                {/* Main Course */}
+                                                {
+                                                    mainCourse.length > 0 && (
 
-                                                    <h2 className="text-gray-400 text-3xl">
+                                                        <>
+                                                            <h2 className="text-white text-[35px] md:text-[45px] font-bold mb-8">
 
-                                                        No Items Available
+                                                                Main Course
 
-                                                    </h2>
-                                                )
-                                        }
+                                                            </h2>
 
-                                    </div>
-                                )
-                        }
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
 
-                    </div>
+                                                                {
+                                                                    mainCourse.map(
+                                                                        item => (
 
+                                                                            <FoodCard
+                                                                                key={item.id}
+                                                                                item={item}
+                                                                            />
+                                                                        )
+                                                                    )
+                                                                }
 
-                </div>
+                                                            </div>
+                                                        </>
+                                                    )
+                                                }
+
+                                                {/* Side Dish */}
+                                                {
+                                                    sideDish.length > 0 && (
+
+                                                        <>
+                                                            <h2 className="text-white text-[35px] md:text-[45px] font-bold mb-8">
+
+                                                                Side Dish
+
+                                                            </h2>
+
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                                                                {
+                                                                    sideDish.map(
+                                                                        item => (
+
+                                                                            <FoodCard
+                                                                                key={item.id}
+                                                                                item={item}
+                                                                            />
+                                                                        )
+                                                                    )
+                                                                }
+
+                                                            </div>
+                                                        </>
+                                                    )
+                                                }
+
+                                                {
+                                                    foods.length === 0 && (
+
+                                                        <h2 className="text-gray-400 text-3xl">
+
+                                                            No Foods Added Yet
+
+                                                        </h2>
+                                                    )
+                                                }
+
+                                            </>
+
+                                        )
+
+                                        : (
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                                                {
+                                                    foods.length > 0
+
+                                                        ? foods.map(
+                                                            item => (
+
+                                                                <FoodCard
+                                                                    key={item.id}
+                                                                    item={item}
+                                                                />
+                                                            )
+                                                        )
+
+                                                        : (
+
+                                                            <h2 className="text-gray-400 text-3xl">
+
+                                                                No Items Available
+
+                                                            </h2>
+                                                        )
+                                                }
+
+                                            </div>
+                                        )
+                                }
+
+                            </div>
+
+                        </div>
+                    )
+                }
 
             </section>
-            {/* Global Cart */}
+
             <Cart />
 
         </>

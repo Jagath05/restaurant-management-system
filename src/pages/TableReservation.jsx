@@ -68,7 +68,7 @@ export default function TableReservation() {
 
             const response =
                 await fetch(
-`/api/reservations/getCustomerReservations.php?phone=${phone}`
+`https://restaurant-jagath.infinityfreeapp.com/restaurant-api/reservations/getCustomerReservations.php?phone=${phone}`
                 );
 
             const data =
@@ -136,7 +136,7 @@ export default function TableReservation() {
 
             const response =
                 await fetch(
-"/api/reservations/bookTable.php",
+"https://restaurant-jagath.infinityfreeapp.com/restaurant-api/reservations/bookTable.php",
                     {
                         method:
                         "POST",

@@ -1,88 +1,85 @@
-import React, {
-    useState,
-    useEffect
-} from "react";
-
-import AdminLayout
-from "../../layout/AdminLayout";
+import React, { useState, useEffect } from "react";
+import AdminLayout from "../../layout/AdminLayout";
 
 export default function ManageMenu() {
 
     const API_BASE =
-        "/api";
+        "https://restaurant-jagath.infinityfreeapp.com/restaurant-api";
 
-    const [food, setFood] =
-        useState({
-            food_name: "",
-            category: "",
-            section: "",
-            food_type: "",
-            price: "",
-            image: null
-        });
+    const [food, setFood] = useState({
+        food_name: "",
+        category: "",
+        section: "",
+        food_type: "",
+        price: "",
+        image: null
+    });
 
-    const [foods, setFoods] =
-        useState([]);
-
-    const [editId, setEditId] =
-        useState(null);
-
-    const [loading, setLoading] =
-        useState(false);
+    const [foods, setFoods] = useState([]);
+    const [editId, setEditId] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     // Input Change
-    const handleChange =
-        (e) => {
+    const handleChange = (e) => {
 
         setFood({
             ...food,
-            [e.target.name]:
-                e.target.value
+            [e.target.name]: e.target.value
         });
     };
 
     // Image Upload
-    const handleImage =
-        (e) => {
+    const handleImage = (e) => {
 
         setFood({
             ...food,
-            image:
-                e.target.files[0]
+            image: e.target.files[0]
         });
     };
 
     // Fetch Foods
-    const fetchFoods =
-        async () => {
+    const fetchFoods = async () => {
 
         try {
 
-            const response =
-                await fetch(
-                    `${API_BASE}/menu/getFoods.php`
-                );
-
-            const text =
-                await response.text();
-
-            console.log(
-                "Foods API:",
-                text
+            const response = await fetch(
+                `${API_BASE}/menu/getFoods.php`
             );
 
-            const data =
-                JSON.parse(text);
+            const text = await response.text();
+
+            console.log("Foods API:", text);
+
+            let data = [];
+
+            try {
+                data = JSON.parse(text);
+            } catch {
+
+                console.log(
+                    "Invalid JSON:",
+                    text
+                );
+
+                alert(
+                    "Backend returned invalid response"
+                );
+
+                return;
+            }
 
             setFoods(
                 Array.isArray(data)
-                ? data
-                : []
+                    ? data
+                    : []
             );
 
-        } catch(error){
+        } catch (error) {
 
-            console.log(error);
+            console.log(
+                "Fetch Error:",
+                error
+            );
 
             alert(
                 "Failed to load menu"
@@ -91,27 +88,22 @@ export default function ManageMenu() {
     };
 
     useEffect(() => {
-
         fetchFoods();
-
     }, []);
 
     // Submit Form
-    const handleSubmit =
-        async (e) => {
+    const handleSubmit = async (e) => {
 
         e.preventDefault();
 
-        if(
+        if (
             !food.food_name ||
             !food.category ||
             !food.price
-        ){
-
+        ) {
             alert(
                 "Please fill required fields"
             );
-
             return;
         }
 
@@ -147,7 +139,7 @@ export default function ManageMenu() {
                 food.price
             );
 
-            if(food.image){
+            if (food.image) {
 
                 formData.append(
                     "image",
@@ -157,10 +149,10 @@ export default function ManageMenu() {
 
             const apiURL =
                 editId
-                ? `${API_BASE}/menu/updateFood.php`
-                : `${API_BASE}/menu/addFood.php`;
+                    ? `${API_BASE}/menu/updateFood.php`
+                    : `${API_BASE}/menu/addFood.php`;
 
-            if(editId){
+            if (editId) {
 
                 formData.append(
                     "id",
@@ -202,15 +194,14 @@ export default function ManageMenu() {
                 return;
             }
 
-            if(data.success){
+            if (data.success) {
 
                 alert(
                     editId
-                    ? "Dish Updated Successfully 🎉"
-                    : "Food Added Successfully 🎉"
+                        ? "Dish Updated Successfully 🎉"
+                        : "Food Added Successfully 🎉"
                 );
 
-                // Reset form
                 setFood({
                     food_name: "",
                     category: "",
@@ -232,7 +223,7 @@ export default function ManageMenu() {
                 );
             }
 
-        } catch(error){
+        } catch (error) {
 
             console.log(error);
 
@@ -248,15 +239,14 @@ export default function ManageMenu() {
     };
 
     // Delete Food
-    const deleteFood =
-        async (id) => {
+    const deleteFood = async (id) => {
 
         const confirmDelete =
             window.confirm(
                 "Delete this food?"
             );
 
-        if(!confirmDelete)
+        if (!confirmDelete)
             return;
 
         try {
@@ -271,7 +261,7 @@ export default function ManageMenu() {
 
             fetchFoods();
 
-        } catch(error){
+        } catch (error) {
 
             console.log(error);
 
@@ -282,11 +272,9 @@ export default function ManageMenu() {
     };
 
     // Edit Food
-    const editFood =
-        (item) => {
+    const editFood = (item) => {
 
         setFood({
-
             food_name:
                 item.food_name,
 
@@ -311,27 +299,21 @@ export default function ManageMenu() {
 
         window.scrollTo({
             top: 0,
-            behavior:
-                "smooth"
+            behavior: "smooth"
         });
     };
 
     return (
-
         <AdminLayout>
 
             <div>
 
                 <h1 className="text-white text-5xl font-bold">
-
                     Manage Menu
-
                 </h1>
 
                 <p className="text-gray-400 mt-3 text-lg">
-
                     Add food dishes for customers
-
                 </p>
 
                 {/* FORM */}
@@ -411,13 +393,11 @@ export default function ManageMenu() {
                         disabled={loading}
                         className="col-span-1 md:col-span-2 bg-violet-600 hover:bg-violet-700 py-5 rounded-2xl text-white text-xl font-bold duration-300"
                     >
-                        {
-                            loading
+                        {loading
                             ? "Processing..."
                             : editId
-                            ? "Update Dish"
-                            : "Add Dish"
-                        }
+                                ? "Update Dish"
+                                : "Add Dish"}
                     </button>
 
                 </form>
@@ -426,70 +406,42 @@ export default function ManageMenu() {
                 <div className="mt-16">
 
                     <h1 className="text-white text-4xl font-bold mb-8">
-
                         Food List
-
                     </h1>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
 
-                        {
-                            foods.map((item) => (
+                        {foods.map((item) => (
 
-                                <div
-                                    key={item.id}
-                                    className="bg-white/5 border border-white/10 rounded-[30px] overflow-hidden shadow-2xl"
-                                >
+                            <div
+                                key={item.id}
+                                className="bg-white/5 border border-white/10 rounded-[30px] overflow-hidden shadow-2xl"
+                            >
 
-                                    <img
-                                        src={`${API_BASE}/uploads/images/${item.image}`}
-                                        alt=""
-                                        className="w-full h-56 object-cover"
-                                    />
+                                <img
+                                    src={`${API_BASE}/uploads/images/${item.image}`}
+                                    alt=""
+                                    className="w-full h-56 object-cover"
+                                />
 
-                                    <div className="p-6">
+                                <div className="p-6">
 
-                                        <h2 className="text-white text-2xl font-bold">
-                                            {item.food_name}
-                                        </h2>
+                                    <h2 className="text-white text-2xl font-bold">
+                                        {item.food_name}
+                                    </h2>
 
-                                        <p className="text-gray-400 mt-2">
-                                            {item.category}
-                                            {" • "}
-                                            {item.section}
-                                        </p>
+                                    <p className="text-gray-400 mt-2">
+                                        {item.category} • {item.section}
+                                    </p>
 
-                                        <p className="text-violet-400 text-2xl font-bold mt-4">
-                                            ₹{item.price}
-                                        </p>
-
-                                        <div className="flex gap-4 mt-6">
-
-                                            <button
-                                                onClick={() =>
-                                                    editFood(item)
-                                                }
-                                                className="flex-1 bg-yellow-500 hover:bg-yellow-600 py-3 rounded-xl text-white font-semibold"
-                                            >
-                                                Edit
-                                            </button>
-
-                                            <button
-                                                onClick={() =>
-                                                    deleteFood(item.id)
-                                                }
-                                                className="flex-1 bg-red-500 hover:bg-red-600 py-3 rounded-xl text-white font-semibold"
-                                            >
-                                                Delete
-                                            </button>
-
-                                        </div>
-
-                                    </div>
+                                    <p className="text-violet-400 text-2xl font-bold mt-4">
+                                        ₹{item.price}
+                                    </p>
 
                                 </div>
-                            ))
-                        }
+
+                            </div>
+                        ))}
 
                     </div>
 

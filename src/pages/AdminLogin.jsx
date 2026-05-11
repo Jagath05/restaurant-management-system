@@ -28,7 +28,7 @@ export default function AdminLogin() {
         e.preventDefault();
 
         const response = await fetch(
-"/api/admin/login.php",
+"https://restaurant-jagath.infinityfreeapp.com/restaurant-api/admin/login.php",
 {
 method: "POST",
 headers: {
