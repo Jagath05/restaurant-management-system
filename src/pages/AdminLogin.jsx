@@ -1,67 +1,141 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, {
+    useState,
+    useEffect
+} from "react";
 
 export default function AdminLogin() {
 
-    const navigate = useNavigate();
+    useEffect(() => {
 
-    const [form, setForm] = useState({
-        username: "",
-        password: ""
-    });
+        const admin =
+            localStorage.getItem(
+                "admin"
+            );
 
-    const [message, setMessage] =
+        if(admin){
+
+            window.location.href =
+                "/dashboard";
+        }
+
+    }, []);
+
+    const [form,
+        setForm] =
+        useState({
+            username: "",
+            password: ""
+        });
+
+    const [loading,
+        setLoading] =
+        useState(false);
+
+    const [message,
+        setMessage] =
         useState("");
 
-    const handleChange = (e) => {
+    const handleChange =
+        (e) => {
 
-        setForm({
-            ...form,
-            [e.target.name]:
-                e.target.value
-        });
-    };
+            setForm({
+                ...form,
+                [e.target.name]:
+                    e.target.value
+            });
+        };
 
     const handleLogin =
         async (e) => {
 
-        e.preventDefault();
+            e.preventDefault();
 
-        const response = await fetch(
-"https://restaurant-jagath.infinityfreeapp.com/restaurant-api/admin/login.php",
-{
-method: "POST",
-headers: {
-Accept: "application/json"
-},
-body: JSON.stringify({
-username,
-password
-})
-}
-);
+            try {
 
-const data = await response.json();
+                setLoading(true);
+                setMessage("");
 
-console.log(data);
+                const response =
+                    await fetch(
+                        "/restaurant-api/admin/login.php",
+                        {
+                            method:
+                                "POST",
 
-if(data.success){
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
 
-localStorage.setItem(
-"admin",
-JSON.stringify(data.admin)
-);
+                            body:
+                                JSON.stringify({
+                                    username:
+                                        form.username,
 
-navigate("/dashboard");
+                                    password:
+                                        form.password
+                                })
+                        }
+                    );
 
-}else{
+                const text =
+                    await response.text();
 
-alert(
-data.message
-);
+                console.log(
+                    "Login API Response:",
+                    text
+                );
 
-}
-    };
+                let data;
+
+                try {
+
+                    data =
+                        JSON.parse(
+                            text
+                        );
+
+                } catch {
+
+                    setMessage(
+                        "Server Error"
+                    );
+
+                    return;
+                }
+
+                if(data.success){
+
+                    localStorage.setItem(
+                        "admin",
+                        JSON.stringify(
+                            data.admin
+                        )
+                    );
+
+                    window.location.href =
+                        "/dashboard";
+
+                } else {
+
+                    setMessage(
+                        data.message
+                    );
+                }
+
+            } catch(error){
+
+                console.log(error);
+
+                setMessage(
+                    "Login Failed"
+                );
+
+            } finally {
+
+                setLoading(false);
+            }
+        };
 
     return (
 
@@ -70,52 +144,66 @@ data.message
             <div className="w-full max-w-md bg-white/5 border border-white/10 rounded-[35px] p-10 backdrop-blur-xl shadow-2xl">
 
                 <h1 className="text-white text-5xl font-bold text-center">
+
                     Admin Login
+
                 </h1>
 
-                <p className="text-gray-400 text-center mt-3">
-                    Restaurant Management
-                </p>
-
                 <form
-                    onSubmit={handleLogin}
+                    onSubmit={
+                        handleLogin
+                    }
                     className="mt-10 space-y-6"
                 >
 
-                    {/* Username */}
                     <input
                         type="text"
                         name="username"
                         placeholder="Username"
-                        value={form.username}
-                        onChange={handleChange}
-                        className="w-full bg-[#312B45] border border-white/10 rounded-2xl p-5 text-white outline-none"
+                        value={
+                            form.username
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        className="w-full bg-[#312B45] rounded-2xl p-5 text-white"
                     />
 
-                    {/* Password */}
                     <input
                         type="password"
                         name="password"
                         placeholder="Password"
-                        value={form.password}
-                        onChange={handleChange}
-                        className="w-full bg-[#312B45] border border-white/10 rounded-2xl p-5 text-white outline-none"
+                        value={
+                            form.password
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        className="w-full bg-[#312B45] rounded-2xl p-5 text-white"
                     />
 
-                    {/* Button */}
                     <button
-                        className="w-full bg-violet-600 hover:bg-violet-700 py-5 rounded-2xl text-white text-lg font-semibold duration-300"
+                        type="submit"
+                        disabled={
+                            loading
+                        }
+                        className="w-full bg-violet-600 py-5 rounded-2xl text-white"
                     >
-                        Login
+
+                        {
+                            loading
+                            ? "Logging In..."
+                            : "Login"
+                        }
+
                     </button>
 
                 </form>
 
-                {/* Message */}
                 {
                     message && (
 
-                        <p className="text-center mt-6 text-violet-400">
+                        <p className="text-red-400 text-center mt-5">
 
                             {message}
 

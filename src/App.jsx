@@ -45,6 +45,7 @@ from "./pages/admin/TableManagement";
 
 import About from "./pages/About";
 import Feedback from "./pages/Feedback";
+import AdminProtectedRoute from "./components/AdminProtectedRoute";
 
 export default function App() {
 
@@ -95,14 +96,24 @@ element={<AdminLogin />}
 />
 
 <Route
-path="/dashboard"
-element={<Dashboard />}
+    path="/dashboard"
+    element={
+        <AdminProtectedRoute>
+            <Dashboard />
+        </AdminProtectedRoute>
+    }
 />
 
+
 <Route
-path="/manage-menu"
-element={<ManageMenu />}
+    path="/manage-menu"
+    element={
+        <AdminProtectedRoute>
+            <ManageMenu />
+        </AdminProtectedRoute>
+    }
 />
+
 
 <Route
 path="/tablet-setup"
@@ -111,7 +122,9 @@ element={<TabletSetup />}
 
 <Route
 path="/manage-orders"
-element={<ManageOrders />}
+element={ <AdminProtectedRoute>
+        <ManageOrders />
+        </AdminProtectedRoute> }
 />
 
 <Route
@@ -121,12 +134,16 @@ element={<OrderStatus />}
 
 <Route
 path="/reservations"
-element={<ManageReservations />}
+element={<AdminProtectedRoute>
+         <ManageReservations />
+        </AdminProtectedRoute>}
 />
 
 <Route
 path="/table-management"
-element={<TableManagement />}
+element={ <AdminProtectedRoute>
+         <TableManagement />
+        </AdminProtectedRoute> }
 />
 
 <Route

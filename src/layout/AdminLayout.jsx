@@ -132,17 +132,21 @@ export default function AdminLayout({
 
                 {/* Logout */}
                 <button
-                    onClick={
-                        handleLogout
-                    }
-                    className="mt-auto flex items-center gap-3 bg-red-500 hover:bg-red-600 duration-300 px-5 py-4 rounded-2xl text-white"
-                >
+    onClick={() => {
 
-                    <LogOut />
+        localStorage.removeItem(
+            "admin"
+        );
 
-                    Logout
+        window.location.href =
+            "/admin";
+    }}
+    className="w-full bg-red-500 hover:bg-red-600 py-4 rounded-2xl text-white font-bold mt-6 duration-300"
+>
 
-                </button>
+    Logout
+
+</button>
 
             </div>
 
