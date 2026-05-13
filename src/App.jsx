@@ -46,6 +46,7 @@ from "./pages/admin/TableManagement";
 import About from "./pages/About";
 import Feedback from "./pages/Feedback";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
+import ManageFeedback from "./pages/admin/ManageFeedback";
 
 export default function App() {
 
@@ -98,9 +99,9 @@ element={<AdminLogin />}
 <Route
     path="/dashboard"
     element={
-        <AdminProtectedRoute>
-            <Dashboard />
-        </AdminProtectedRoute>
+       <AdminProtectedRoute><Dashboard /></AdminProtectedRoute>
+            
+        
     }
 />
 
@@ -154,6 +155,13 @@ element={<About />}
 <Route
 path="/feedback"
 element={<Feedback />}
+/>
+
+<Route
+    path="/manage-feedback"
+    element={
+        <ManageFeedback />
+    }
 />
 
 </Routes>

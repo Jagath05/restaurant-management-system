@@ -1,241 +1,558 @@
-import React,
-{
-useEffect,
-useState
-}
-from "react";
+import React, {
+    useEffect,
+    useMemo,
+    useState
+} from "react";
+
+import {
+    motion
+} from "framer-motion";
+
+import {
+    Search,
+    Clock,
+    Receipt
+} from "lucide-react";
+
+import AdminLayout
+from "../../layout/AdminLayout";
+
+const API_URL =
+"https://restaurant-jagath.infinityfreeapp.com/restaurant-api/orders";
 
 export default function ManageOrders() {
 
-const [orders,
-setOrders]
-=
-useState([]);
+    const [orders,
+        setOrders] =
+        useState([]);
 
-useEffect(() => {
+    const [loading,
+        setLoading] =
+        useState(true);
 
-fetchOrders();
+    const [search,
+        setSearch] =
+        useState("");
 
-}, []);
+    const [statusFilter,
+        setStatusFilter] =
+        useState("All");
 
-const fetchOrders =
-async () => {
+    useEffect(() => {
 
-const response =
-await fetch(
-"https://restaurant-jagath.infinityfreeapp.com/restaurant-api/orders/getOrders.php"
-);
+        fetchOrders();
 
-const data =
-await response.json();
+        const interval =
+            setInterval(
+                fetchOrders,
+                5000
+            );
 
-setOrders(data);
-};
+        return () =>
+            clearInterval(
+                interval
+            );
 
-const updateFoodStatus =
-async (
-orderId,
-itemIndex,
-status
-) => {
+    }, []);
 
-await fetch(
-"https://restaurant-jagath.infinityfreeapp.com/restaurant-api/orders/updateOrderStatus.php",
-{
-method:"POST",
-headers:{
-"Content-Type":
-"application/json"
-},
-body:
-JSON.stringify({
-orderId,
-itemIndex,
-status
-})
-}
-);
+    const fetchOrders =
+        async () => {
 
-fetchOrders();
-};
+            try {
 
-const getColor =
-(status)=>{
+                const response =
+                    await fetch(
+`${API_URL}/getOrders.php`
+                    );
 
-switch(status){
+                const data =
+                    await response.json();
 
-case "Pending":
-return "bg-yellow-500";
+                setOrders(
+                    data
+                );
 
-case "Preparing":
-return "bg-orange-500";
+            } catch (
+                error
+            ) {
 
-case "Completed":
-return "bg-green-600";
+                console.log(
+                    error
+                );
 
-case "Cancelled":
-return "bg-red-600";
+            } finally {
 
-default:
-return "bg-gray-600";
-}
-};
+                setLoading(
+                    false
+                );
+            }
+        };
 
-return (
+    const updateFoodStatus =
+        async (
+            orderId,
+            itemIndex,
+            status
+        ) => {
 
-<section className="min-h-screen bg-[#262235] p-10">
+            try {
 
-<h1 className="text-white text-6xl font-bold mb-10">
+                await fetch(
+`${API_URL}/updateOrderStatus.php`,
+                    {
+                        method:
+                            "POST",
 
-Manage Orders
+                        headers:
+                        {
+                            "Content-Type":
+                                "application/json"
+                        },
 
-</h1>
+                        body:
+                            JSON.stringify(
+                                {
+                                    orderId,
+                                    itemIndex,
+                                    status
+                                }
+                            )
+                    }
+                );
 
-<div className="space-y-8">
+                fetchOrders();
 
-{
-orders.map(
-order => (
+            } catch (
+                error
+            ) {
 
-<div
-key={order.id}
-className="bg-white/5 border border-white/10 rounded-[30px] p-8"
->
+                console.log(
+                    error
+                );
+            }
+        };
 
-<h2 className="text-white text-3xl font-bold">
+    const getStatusColor =
+        (status) => {
 
-Table {
-order.table_number
-}
+            switch (
+                status
+            ) {
 
-</h2>
+                case "Pending":
 
-<p className="text-gray-400 mt-2">
+                    return
+"bg-yellow-500/20 text-yellow-400 border-yellow-500/20";
 
-Payment:
-{order.payment_method}
+                case "Preparing":
 
-</p>
+                    return
+"bg-blue-500/20 text-blue-400 border-blue-500/20";
 
-<div className="mt-8 space-y-6">
+                case "Completed":
 
-{
-order.items.map(
-(item,index)=>(
+                    return
+"bg-green-500/20 text-green-400 border-green-500/20";
 
-<div
-key={index}
-className="bg-[#312B45] rounded-3xl p-6"
->
+                case "Cancelled":
 
-<div className="flex justify-between">
+                    return
+"bg-red-500/20 text-red-400 border-red-500/20";
 
-<div>
+                default:
 
-<h3 className="text-white text-2xl font-bold">
+                    return
+"bg-gray-500/20 text-gray-400 border-gray-500/20";
+            }
+        };
 
-{
-item.food_name
-}
+    const filteredOrders =
+        useMemo(() => {
 
-x
-{
-item.quantity
-}
+            return orders.filter(
+                order => {
 
-</h3>
+                    const searchMatch =
+                        order.order_number
+                            ?.toLowerCase()
+                            .includes(
+                                search.toLowerCase()
+                            )
 
-<p className="text-violet-400 mt-2">
+                        ||
 
-₹
-{
-item.price *
-item.quantity
-}
+                        order.table_number
+                            ?.toString()
+                            .includes(
+                                search
+                            );
 
-</p>
+                    const statusMatch =
+                        statusFilter ===
+                        "All"
 
-</div>
+                        ||
 
-<span className={`${getColor(item.status)} px-4 py-2 rounded-xl text-white h-fit`}>
+                        order.status ===
+                        statusFilter;
 
-{
-item.status
-}
+                    return (
+                        searchMatch &&
+                        statusMatch
+                    );
+                }
+            );
 
-</span>
+        }, [
+            orders,
+            search,
+            statusFilter
+        ]);
 
-</div>
+    const filters = [
+        "All",
+        "Pending",
+        "Preparing",
+        "Completed",
+        "Cancelled"
+    ];
 
-<div className="flex gap-3 mt-5 flex-wrap">
+    return (
 
-<button
-onClick={() =>
-updateFoodStatus(
-order.id,
-index,
-"Preparing"
-)
-}
-className="bg-yellow-500 px-4 py-2 rounded-xl text-white"
->
-Preparing
-</button>
+        <AdminLayout>
 
-<button
-onClick={() =>
-updateFoodStatus(
-order.id,
-index,
-"Completed"
-)
-}
-className="bg-green-600 px-4 py-2 rounded-xl text-white"
->
-Completed
-</button>
+            <div className="space-y-8">
 
-<button
-onClick={() =>
-updateFoodStatus(
-order.id,
-index,
-"Cancelled"
-)
-}
-className="bg-red-600 px-4 py-2 rounded-xl text-white"
->
-Cancel
-</button>
+                {/* Header */}
+                <motion.div
+                    initial={{
+                        opacity: 0,
+                        y: 30
+                    }}
+                    animate={{
+                        opacity: 1,
+                        y: 0
+                    }}
+                >
 
-</div>
+                    <h1 className="text-white text-4xl md:text-6xl font-bold">
 
-</div>
-))
-}
+                        Manage Orders
 
-</div>
+                    </h1>
 
-<div className="border-t border-white/10 mt-8 pt-6 flex justify-between text-white text-2xl font-bold">
+                    <p className="text-gray-400 mt-3 text-lg">
 
-<span>
-Total
-</span>
+                        Live kitchen order tracking
 
-<span>
-₹{
-order.total
-}
-</span>
+                    </p>
 
-</div>
+                </motion.div>
 
-</div>
-))
-}
+                {/* Filters */}
+                <div className="bg-white/5 border border-white/10 rounded-[35px] p-6 backdrop-blur-xl">
 
-</div>
+                    {/* Search */}
+                    <div className="flex items-center bg-[#231b38] rounded-2xl px-5 py-4 border border-white/10">
 
-</section>
-);
+                        <Search
+                            size={20}
+                            className="text-violet-400"
+                        />
+
+                        <input
+                            type="text"
+                            placeholder="Search order or table..."
+                            value={search}
+                            onChange={(e) =>
+                                setSearch(
+                                    e.target.value
+                                )
+                            }
+                            className="bg-transparent outline-none text-white ml-4 w-full placeholder:text-gray-500"
+                        />
+
+                    </div>
+
+                    {/* Status Filters */}
+                    <div className="flex flex-wrap gap-3 mt-6">
+
+                        {
+                            filters.map(
+                                item => (
+
+                                    <button
+                                        key={item}
+                                        onClick={() =>
+                                            setStatusFilter(
+                                                item
+                                            )
+                                        }
+                                        className={`px-5 py-3 rounded-2xl border duration-300
+                                        ${
+                                            statusFilter ===
+                                            item
+
+                                            ? "bg-violet-600 border-violet-500 text-white"
+
+                                            : "bg-white/5 border-white/10 text-gray-300 hover:bg-white/10"
+                                        }`}
+                                    >
+
+                                        {item}
+
+                                    </button>
+                                )
+                            )
+                        }
+
+                    </div>
+
+                </div>
+
+                {/* Orders */}
+                {
+                    loading
+
+                    ? (
+
+                        <div className="grid gap-6">
+
+                            {
+                                [...Array(5)].map(
+                                    (_, i) => (
+
+                                        <div
+                                            key={i}
+                                            className="h-[280px] rounded-[35px] bg-white/5 animate-pulse"
+                                        />
+                                    )
+                                )
+                            }
+
+                        </div>
+
+                    )
+
+                    : (
+
+                        <div className="space-y-6">
+
+                            {
+                                filteredOrders.map(
+                                    (
+                                        order,
+                                        index
+                                    ) => (
+
+                                        <motion.div
+                                            key={order.id}
+                                            initial={{
+                                                opacity: 0,
+                                                y: 40
+                                            }}
+                                            animate={{
+                                                opacity: 1,
+                                                y: 0
+                                            }}
+                                            transition={{
+                                                delay:
+                                                    index *
+                                                    0.05
+                                            }}
+                                            className="bg-white/5 border border-white/10 rounded-[35px] p-6 md:p-8 backdrop-blur-xl"
+                                        >
+
+                                            {/* Top */}
+                                            <div className="flex flex-col lg:flex-row justify-between gap-5">
+
+                                                <div>
+
+                                                    <div className="flex items-center gap-3 flex-wrap">
+
+                                                        <Receipt
+                                                            className="text-violet-400"
+                                                        />
+
+                                                        <h2 className="text-white text-2xl md:text-3xl font-bold">
+
+                                                            {
+                                                                order.order_number
+                                                            }
+
+                                                        </h2>
+
+                                                    </div>
+
+                                                    <p className="text-gray-400 mt-3">
+
+                                                        Table {
+                                                            order.table_number
+                                                        }
+
+                                                    </p>
+
+                                                    <div className="flex items-center gap-2 mt-3 text-gray-500 text-sm">
+
+                                                        <Clock
+                                                            size={16}
+                                                        />
+
+                                                        {
+                                                            order.created_at
+                                                        }
+
+                                                    </div>
+
+                                                </div>
+
+                                                <div className="flex flex-wrap gap-3 h-fit">
+
+                                                    <span className={`px-5 py-3 rounded-2xl border font-medium ${getStatusColor(order.status)}`}>
+
+                                                        {
+                                                            order.status
+                                                        }
+
+                                                    </span>
+
+                                                    <span className="px-5 py-3 rounded-2xl bg-green-500/20 text-green-400 border border-green-500/20">
+
+                                                        {
+                                                            order.payment_method
+                                                        }
+
+                                                    </span>
+
+                                                </div>
+
+                                            </div>
+
+                                            {/* Items */}
+                                            <div className="mt-8 grid gap-5">
+
+                                                {
+                                                    order.items?.map(
+                                                        (
+                                                            item,
+                                                            itemIndex
+                                                        ) => (
+
+                                                            <div
+                                                                key={itemIndex}
+                                                                className="bg-[#231b38] rounded-[30px] p-5 border border-white/5"
+                                                            >
+
+                                                                <div className="flex flex-col lg:flex-row justify-between gap-5">
+
+                                                                    <div>
+
+                                                                        <h3 className="text-white text-xl font-bold">
+
+                                                                            {
+                                                                                item.food_name
+                                                                            }
+
+                                                                            {" "}x
+                                                                            {
+                                                                                item.quantity
+                                                                            }
+
+                                                                        </h3>
+
+                                                                        <p className="text-violet-400 mt-2 font-semibold">
+
+                                                                            ₹
+                                                                            {
+                                                                                item.price *
+                                                                                item.quantity
+                                                                            }
+
+                                                                        </p>
+
+                                                                    </div>
+
+                                                                    <div className="flex flex-wrap gap-3">
+
+                                                                        {
+                                                                            [
+                                                                                "Preparing",
+                                                                                "Completed",
+                                                                                "Cancelled"
+                                                                            ].map(
+                                                                                status => (
+
+                                                                                    <button
+                                                                                        key={status}
+                                                                                        onClick={() =>
+                                                                                            updateFoodStatus(
+                                                                                                order.id,
+                                                                                                itemIndex,
+                                                                                                status
+                                                                                            )
+                                                                                        }
+                                                                                        className={`px-5 py-3 rounded-2xl text-white font-medium duration-300
+                                                                                        ${
+                                                                                            status === "Preparing"
+                                                                                            ? "bg-yellow-500 hover:bg-yellow-600"
+
+                                                                                            : status === "Completed"
+                                                                                            ? "bg-green-600 hover:bg-green-700"
+
+                                                                                            : "bg-red-600 hover:bg-red-700"
+                                                                                        }`}
+                                                                                    >
+
+                                                                                        {
+                                                                                            status
+                                                                                        }
+
+                                                                                    </button>
+                                                                                )
+                                                                            )
+                                                                        }
+
+                                                                    </div>
+
+                                                                </div>
+
+                                                            </div>
+                                                        )
+                                                    )
+                                                }
+
+                                            </div>
+
+                                            {/* Total */}
+                                            <div className="border-t border-white/10 mt-8 pt-6 flex justify-between items-center">
+
+                                                <span className="text-gray-400 text-lg">
+
+                                                    Total
+
+                                                </span>
+
+                                                <h2 className="text-violet-400 text-3xl font-bold">
+
+                                                    ₹{
+                                                        order.total
+                                                    }
+
+                                                </h2>
+
+                                            </div>
+
+                                        </motion.div>
+                                    )
+                                )
+                            }
+
+                        </div>
+                    )
+                }
+
+            </div>
+
+        </AdminLayout>
+    );
 }

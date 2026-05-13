@@ -1,7 +1,12 @@
 import React, {
     useEffect,
+    useMemo,
     useState
 } from "react";
+
+import {
+    motion
+} from "framer-motion";
 
 import FoodCard from "../components/FoodCard";
 import Cart from "../components/Cart";
@@ -11,6 +16,10 @@ import {
     useNavigate
 } from "react-router-dom";
 
+import {
+    Search
+} from "lucide-react";
+
 export default function MenuLayout({
     meal
 }) {
@@ -18,17 +27,29 @@ export default function MenuLayout({
     const navigate =
         useNavigate();
 
-    const [foods, setFoods] =
+    const [foods,
+        setFoods] =
         useState([]);
 
     const [loading,
         setLoading] =
         useState(true);
 
-    const API_BASE =
-        "/restaurant-api";
+    const [search,
+        setSearch] =
+        useState("");
 
-    // Fetch Foods
+    const [foodType,
+        setFoodType] =
+        useState("All");
+
+    const [section,
+        setSection] =
+        useState("All");
+
+    const API_URL =
+"https://restaurant-jagath.infinityfreeapp.com/restaurant-api/menu/getFoods.php";
+
     useEffect(() => {
 
         fetchFoods();
@@ -38,90 +59,134 @@ export default function MenuLayout({
     const fetchFoods =
         async () => {
 
-        try {
-
-            setLoading(true);
-
-            const response =
-                await fetch(
-                    `${API_BASE}/menu/getFoods.php`
-                );
-
-            const text =
-                await response.text();
-
-            console.log(
-                "Foods API:",
-                text
-            );
-
-            let data = [];
-
             try {
 
-                data =
-                    JSON.parse(text);
+                setLoading(true);
 
-            } catch {
+                const response =
+                    await fetch(
+                        API_URL
+                    );
 
-                console.log(
-                    "Invalid JSON:",
-                    text
-                );
+                const data =
+                    await response.json();
 
-                return;
-            }
-
-            // Filter by category
-            const filteredFoods =
-                Array.isArray(data)
+                const filtered =
+                    Array.isArray(
+                        data
+                    )
 
                     ? data.filter(
-                        item =>
+                        (
+                            item
+                        ) =>
+
                             item.category ===
-                            meal
+                            meal &&
+
+                            item.available ===
+                            "1"
                     )
 
                     : [];
 
-            setFoods(
-                filteredFoods
+                setFoods(
+                    filtered
+                );
+
+            } catch (error) {
+
+                console.log(
+                    "Fetch Error:",
+                    error
+                );
+
+            } finally {
+
+                setLoading(false);
+            }
+        };
+
+    // Dynamic Filtering
+    const filteredFoods =
+        useMemo(() => {
+
+            return foods.filter(
+                (food) => {
+
+                    const searchMatch =
+                        food.food_name
+                        .toLowerCase()
+                        .includes(
+                            search
+                            .toLowerCase()
+                        );
+
+                    const typeMatch =
+                        foodType ===
+                        "All"
+
+                        ? true
+
+                        : food.food_type ===
+                        foodType;
+
+                    const sectionMatch =
+                        section ===
+                        "All"
+
+                        ? true
+
+                        : food.section ===
+                        section;
+
+                    return (
+                        searchMatch &&
+                        typeMatch &&
+                        sectionMatch
+                    );
+                }
             );
 
-        } catch (error) {
+        }, [
+            foods,
+            search,
+            foodType,
+            section
+        ]);
 
-            console.log(
-                "Fetch Error:",
-                error
-            );
-
-        } finally {
-
-            setLoading(false);
-        }
-    };
-
-    // Sections
     const starters =
-        foods.filter(
+        filteredFoods.filter(
             item =>
                 item.section ===
                 "Starter"
         );
 
     const mainCourse =
-        foods.filter(
+        filteredFoods.filter(
             item =>
                 item.section ===
                 "Main Course"
         );
 
     const sideDish =
-        foods.filter(
+        filteredFoods.filter(
             item =>
                 item.section ===
                 "Side Dish"
         );
+
+    const filterBtn =
+        (
+            active,
+            value
+        ) =>
+            `px-5 py-3 rounded-2xl border text-sm md:text-base transition-all duration-300
+        ${
+            active === value
+                ? "bg-violet-600 border-violet-500 text-white shadow-[0_0_25px_rgba(124,58,237,0.35)]"
+                : "bg-white/5 border-white/10 text-gray-300 hover:bg-white/10"
+        }`;
 
     return (
 
@@ -129,23 +194,43 @@ export default function MenuLayout({
 
             <Navbar />
 
-            <section className="min-h-screen bg-[#262235] px-5 md:px-10 py-20">
+            <section className="min-h-screen bg-[#181325] px-5 md:px-10 pt-36 pb-20">
 
                 {/* Heading */}
-                <div className="mb-16 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                <motion.div
+                    initial={{
+                        opacity: 0,
+                        y: 40
+                    }}
+                    animate={{
+                        opacity: 1,
+                        y: 0
+                    }}
+                    transition={{
+                        duration: 0.5
+                    }}
+                    className="mb-14 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6"
+                >
 
                     <div>
 
-                        <h1 className="text-white text-[45px] md:text-[70px] font-bold">
+                        <p className="text-violet-400 uppercase tracking-[5px] text-sm mb-2">
+
+                            Premium Dining
+
+                        </p>
+
+                        <h1 className="text-white text-[42px] md:text-[70px] font-bold">
 
                             {meal} Menu
 
                         </h1>
 
-                        <p className="text-gray-400 text-[18px] md:text-[24px] mt-3">
+                        <p className="text-gray-400 text-lg md:text-2xl mt-3">
 
-                            Enjoy our delicious{" "}
-                            {meal.toLowerCase()} dishes.
+                            Explore our delicious{" "}
+                            {meal.toLowerCase()}
+                            {" "}special dishes.
 
                         </p>
 
@@ -155,189 +240,352 @@ export default function MenuLayout({
                         onClick={() =>
                             navigate("/")
                         }
-                        className="bg-white/5 border border-white/10 backdrop-blur-md px-7 py-4 rounded-2xl text-white text-lg hover:bg-violet-600/20 hover:scale-105 duration-300 shadow-2xl"
+                        className="bg-white/5 border border-white/10 backdrop-blur-md px-7 py-4 rounded-2xl text-white hover:bg-violet-600/20 hover:scale-105 duration-300"
                     >
 
                         ← Back Home
 
                     </button>
 
-                </div>
+                </motion.div>
+
+                {/* Filter Bar */}
+                <motion.div
+                    initial={{
+                        opacity: 0,
+                        y: 40
+                    }}
+                    animate={{
+                        opacity: 1,
+                        y: 0
+                    }}
+                    transition={{
+                        delay: 0.2
+                    }}
+                    className="bg-white/5 border border-white/10 rounded-[35px] p-5 md:p-8 backdrop-blur-xl mb-14"
+                >
+
+                    {/* Search */}
+                    <div className="flex items-center bg-[#231b38] rounded-2xl px-5 py-4 mb-8 border border-white/10">
+
+                        <Search
+                            size={20}
+                            className="text-violet-400"
+                        />
+
+                        <input
+                            type="text"
+                            placeholder="Search delicious food..."
+                            value={
+                                search
+                            }
+                            onChange={
+                                (
+                                    e
+                                ) =>
+                                    setSearch(
+                                        e
+                                        .target
+                                        .value
+                                    )
+                            }
+                            className="bg-transparent outline-none text-white placeholder:text-gray-500 ml-4 w-full"
+                        />
+
+                    </div>
+
+                    {/* Food Type */}
+                    <div className="mb-8">
+
+                        <h3 className="text-white text-lg font-semibold mb-4">
+
+                            Food Type
+
+                        </h3>
+
+                        <div className="flex flex-wrap gap-3">
+
+                            {
+                                [
+                                    "All",
+                                    "Veg",
+                                    "Non-Veg"
+                                ].map(
+                                    item => (
+
+                                        <button
+                                            key={item}
+                                            onClick={() =>
+                                                setFoodType(
+                                                    item
+                                                )
+                                            }
+                                            className={filterBtn(
+                                                foodType,
+                                                item
+                                            )}
+                                        >
+
+                                            {item}
+
+                                        </button>
+                                    )
+                                )
+                            }
+
+                        </div>
+
+                    </div>
+
+                    {/* Section */}
+                    <div>
+
+                        <h3 className="text-white text-lg font-semibold mb-4">
+
+                            Section
+
+                        </h3>
+
+                        <div className="flex flex-wrap gap-3">
+
+                            {
+                                [
+                                    "All",
+                                    "Starter",
+                                    "Main Course",
+                                    "Side Dish"
+                                ].map(
+                                    item => (
+
+                                        <button
+                                            key={item}
+                                            onClick={() =>
+                                                setSection(
+                                                    item
+                                                )
+                                            }
+                                            className={filterBtn(
+                                                section,
+                                                item
+                                            )}
+                                        >
+
+                                            {item}
+
+                                        </button>
+                                    )
+                                )
+                            }
+
+                        </div>
+
+                    </div>
+
+                </motion.div>
 
                 {/* Loading */}
                 {
                     loading && (
 
-                        <div className="text-center">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-                            <h2 className="text-white text-3xl">
+                            {
+                                [...Array(6)].map(
+                                    (_, i) => (
 
-                                Loading Menu...
-
-                            </h2>
+                                        <div
+                                            key={i}
+                                            className="h-[350px] rounded-[35px] bg-white/5 animate-pulse"
+                                        />
+                                    )
+                                )
+                            }
 
                         </div>
                     )
                 }
 
-                {/* Main Layout */}
+                {/* Menu */}
                 {
-                    !loading && (
+    !loading && (
 
-                        <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
+        <>
+           {
+                  [
+                     "Breakfast",
+                     "Lunch",
+                     "Dinner"
+                    ].includes(meal)
 
-                            {/* LEFT SIDE */}
-                            <div className="xl:col-span-8">
+                ? (
 
-                                {
-                                    meal ===
-                                        "Breakfast" ||
-                                    meal ===
-                                        "Lunch" ||
-                                    meal ===
-                                        "Dinner"
+                    <div className="space-y-16">
 
-                                        ? (
+                        {/* Starters */}
+                        {
+                            starters.length > 0 && (
 
-                                            <>
+                                <div>
 
-                                                {/* Starter */}
-                                                {
-                                                    starters.length > 0 && (
+                                    <h2 className="text-white text-4xl font-bold mb-8">
 
-                                                        <>
-                                                            <h2 className="text-white text-[35px] md:text-[45px] font-bold mb-8">
+                                        Starters
 
-                                                                Starters
+                                    </h2>
 
-                                                            </h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+                                        {
+                                            starters.map(
+                                                item => (
 
-                                                                {
-                                                                    starters.map(
-                                                                        item => (
+                                                    <FoodCard
+                                                        key={item.id}
+                                                        item={item}
+                                                    />
+                                                )
+                                            )
+                                        }
 
-                                                                            <FoodCard
-                                                                                key={item.id}
-                                                                                item={item}
-                                                                            />
-                                                                        )
-                                                                    )
-                                                                }
+                                    </div>
 
-                                                            </div>
-                                                        </>
-                                                    )
-                                                }
+                                </div>
+                            )
+                        }
 
-                                                {/* Main Course */}
-                                                {
-                                                    mainCourse.length > 0 && (
+                        {/* Main Course */}
+                        {
+                            mainCourse.length > 0 && (
 
-                                                        <>
-                                                            <h2 className="text-white text-[35px] md:text-[45px] font-bold mb-8">
+                                <div>
 
-                                                                Main Course
+                                    <h2 className="text-white text-4xl font-bold mb-8">
 
-                                                            </h2>
+                                        Main Course
 
-                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+                                    </h2>
 
-                                                                {
-                                                                    mainCourse.map(
-                                                                        item => (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-                                                                            <FoodCard
-                                                                                key={item.id}
-                                                                                item={item}
-                                                                            />
-                                                                        )
-                                                                    )
-                                                                }
+                                        {
+                                            mainCourse.map(
+                                                item => (
 
-                                                            </div>
-                                                        </>
-                                                    )
-                                                }
+                                                    <FoodCard
+                                                        key={item.id}
+                                                        item={item}
+                                                    />
+                                                )
+                                            )
+                                        }
 
-                                                {/* Side Dish */}
-                                                {
-                                                    sideDish.length > 0 && (
+                                    </div>
 
-                                                        <>
-                                                            <h2 className="text-white text-[35px] md:text-[45px] font-bold mb-8">
+                                </div>
+                            )
+                        }
 
-                                                                Side Dish
+                        {/* Side Dish */}
+                        {
+                            sideDish.length > 0 && (
 
-                                                            </h2>
+                                <div>
 
-                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <h2 className="text-white text-4xl font-bold mb-8">
 
-                                                                {
-                                                                    sideDish.map(
-                                                                        item => (
+                                        Side Dish
 
-                                                                            <FoodCard
-                                                                                key={item.id}
-                                                                                item={item}
-                                                                            />
-                                                                        )
-                                                                    )
-                                                                }
+                                    </h2>
 
-                                                            </div>
-                                                        </>
-                                                    )
-                                                }
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-                                                {
-                                                    foods.length === 0 && (
+                                        {
+                                            sideDish.map(
+                                                item => (
 
-                                                        <h2 className="text-gray-400 text-3xl">
+                                                    <FoodCard
+                                                        key={item.id}
+                                                        item={item}
+                                                    />
+                                                )
+                                            )
+                                        }
 
-                                                            No Foods Added Yet
+                                    </div>
 
-                                                        </h2>
-                                                    )
-                                                }
+                                </div>
+                            )
+                        }
 
-                                            </>
+                        {
+    starters.length === 0 &&
+    mainCourse.length === 0 &&
+    sideDish.length === 0 && (
 
-                                        )
+        <div className="text-center py-20">
 
-                                        : (
+            <h2 className="text-white text-4xl font-bold mb-4">
 
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                🍽 No Foods Found
 
-                                                {
-                                                    foods.length > 0
+            </h2>
 
-                                                        ? foods.map(
-                                                            item => (
+            <p className="text-gray-400 text-lg">
 
-                                                                <FoodCard
-                                                                    key={item.id}
-                                                                    item={item}
-                                                                />
-                                                            )
-                                                        )
+                Try changing filters
+                or search.
 
-                                                        : (
+            </p>
 
-                                                            <h2 className="text-gray-400 text-3xl">
+        </div>
+    )
+}
 
-                                                                No Items Available
+                    </div>
 
-                                                            </h2>
-                                                        )
-                                                }
+                ) : (
 
-                                            </div>
-                                        )
-                                }
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-                            </div>
+                        {
+                            filteredFoods.map(
+                                item => (
+
+                                    <FoodCard
+                                        key={item.id}
+                                        item={item}
+                                    />
+                                )
+                            )
+                        }
+
+                    </div>
+                )
+            }
+        </>
+    )
+}
+
+                {/* Empty */}
+                {
+                    !loading &&
+                    filteredFoods.length ===
+                    0 && (
+
+                        <div className="text-center py-28">
+
+                            <h2 className="text-white text-4xl font-bold mb-4">
+
+                                🍽 No Foods Found
+
+                            </h2>
+
+                            <p className="text-gray-400 text-lg">
+
+                                Try changing
+                                filters or search.
+
+                            </p>
 
                         </div>
                     )

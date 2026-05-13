@@ -1,288 +1,451 @@
-import React,
-{
-useEffect,
-useState
-}
-from "react";
+import React, {
+    useEffect,
+    useMemo,
+    useState
+} from "react";
+
+import {
+    motion
+} from "framer-motion";
+
+import {
+    Clock3,
+    ChefHat,
+    CircleCheckBig
+} from "lucide-react";
 
 import Navbar
 from "../components/Navbar";
 
+const API_BASE =
+"https://restaurant-jagath.infinityfreeapp.com/restaurant-api";
+
 export default function OrderStatus() {
 
-const [orders,
-setOrders]
-=
-useState([]);
+    const [orders,
+        setOrders]
+        =
+        useState([]);
 
-const [loading,
-setLoading]
-=
-useState(true);
+    const [loading,
+        setLoading]
+        =
+        useState(true);
 
-useEffect(() => {
+    const tableNumber =
+        localStorage.getItem(
+            "tableNumber"
+        );
 
-fetchOrders();
+    useEffect(() => {
 
-const interval =
-setInterval(
-fetchOrders,
-3000
-);
+        fetchOrders();
 
-return () =>
-clearInterval(
-interval
-);
+        const interval =
+            setInterval(
+                fetchOrders,
+                3000
+            );
 
-}, []);
+        return () =>
+            clearInterval(
+                interval
+            );
 
-const fetchOrders =
-async () => {
+    }, []);
 
-const tableNumber =
-localStorage.getItem(
-"tableNumber"
-);
+    const fetchOrders =
+        async () => {
 
-if(!tableNumber){
+            if(
+                !tableNumber
+            ){
 
-setLoading(
-false
-);
+                setLoading(
+                    false
+                );
 
-return;
-}
+                return;
+            }
 
-try {
+            try {
 
-const response =
-await fetch(
-`https://restaurant-jagath.infinityfreeapp.com/restaurant-api/orders/getCustomerOrderStatus.php?tableNumber=${tableNumber}`
-);
+                const response =
+                    await fetch(
+`${API_BASE}/orders/getCustomerOrderStatus.php?tableNumber=${tableNumber}`
+                    );
 
-const data =
-await response.json();
+                const data =
+                    await response.json();
 
-setOrders(
-data
-);
+                setOrders(
+                    Array.isArray(data)
+                    ? data
+                    : []
+                );
 
-} catch(error){
+            } catch(error){
 
-console.log(
-error
-);
+                console.log(
+                    error
+                );
 
-} finally {
+            } finally {
 
-setLoading(
-false
-);
-}
-};
+                setLoading(
+                    false
+                );
+            }
+        };
 
-const getStatusColor =
-(status)=>{
+    const getStatusColor =
+        (status)=>{
 
-switch(status){
+            switch(status){
 
-case "Pending":
-return "text-yellow-400";
+                case "Pending":
+                    return
+"text-yellow-400";
 
-case "Preparing":
-return "text-orange-400";
+                case "Preparing":
+                    return
+"text-orange-400";
 
-case "Completed":
-return "text-green-400";
+                case "Completed":
+                    return
+"text-green-400";
 
-case "Cancelled":
-return "text-red-400";
+                case "Cancelled":
+                    return
+"text-red-400";
 
-default:
-return "text-white";
-}
-};
+                default:
+                    return
+"text-white";
+            }
+        };
 
-return (
+    const getProgress =
+        (status) => {
 
-<>
+            switch(status){
 
-<Navbar />
+                case "Pending":
+                    return 33;
 
-<section className="min-h-screen bg-[#262235] px-5 py-20">
+                case "Preparing":
+                    return 66;
 
-<div className="max-w-6xl mx-auto">
+                case "Completed":
+                    return 100;
 
-<h1 className="text-white text-6xl font-bold text-center">
+                default:
+                    return 0;
+            }
+        };
+            return (
 
-🍽️ Order Tracking
+        <>
 
-</h1>
+            <Navbar />
 
-<p className="text-center text-violet-400 text-2xl mt-4">
+            <section className="min-h-screen bg-[#181325] px-5 py-28 relative overflow-hidden">
 
-Table {
-localStorage.getItem(
-"tableNumber"
-)
-}
+                {/* Glow Background */}
+                <div className="absolute top-[-150px] left-[-150px] w-[350px] h-[350px] bg-violet-600/20 blur-[120px] rounded-full" />
 
-</p>
+                <div className="absolute bottom-[-150px] right-[-150px] w-[350px] h-[350px] bg-fuchsia-500/20 blur-[120px] rounded-full" />
 
-{
-loading ? (
+                <div className="max-w-6xl mx-auto relative z-10">
 
-<h2 className="text-center text-white text-3xl mt-20">
+                    {/* Header */}
+                    <div className="text-center">
 
-Loading...
+                        <h1 className="text-white text-4xl md:text-6xl font-bold">
 
-</h2>
+                            🍽️ Order Tracking
 
-)
+                        </h1>
 
-: orders.length === 0 ? (
+                        <p className="text-violet-400 text-xl md:text-2xl mt-4">
 
-<div className="text-center mt-20">
+                            Table {
+                                tableNumber
+                            }
 
-<h2 className="text-white text-4xl font-bold">
+                        </p>
 
-No Active Orders
+                    </div>
 
-</h2>
+                    {
+                        loading ? (
 
-<p className="text-gray-400 mt-4">
+                            <div className="grid md:grid-cols-2 gap-8 mt-16">
 
-Order food to track status
+                                {
+                                    [...Array(3)].map(
+                                        (_, i) => (
 
-</p>
+                                            <div
+                                                key={i}
+                                                className="h-[350px] rounded-[35px] bg-white/5 animate-pulse"
+                                            />
+                                        )
+                                    )
+                                }
 
-</div>
+                            </div>
 
-)
+                        )
 
-: (
+                        : orders.length === 0 ? (
 
-<div className="space-y-10 mt-16">
+                            <div className="text-center mt-24">
 
-{
-orders.map(
-order => (
+                                <h2 className="text-white text-4xl font-bold">
 
-<div
-key={order.id}
-className="bg-white/5 border border-white/10 rounded-[35px] p-8 shadow-2xl"
->
+                                    No Active Orders
 
-<div className="flex justify-between items-center mb-8">
+                                </h2>
 
-<div>
+                                <p className="text-gray-400 mt-4 text-lg">
 
-<h2 className="text-white text-3xl font-bold">
+                                    Order food to track status
 
-Order #
-{
-order.id
-}
+                                </p>
 
-</h2>
+                            </div>
 
-<p className="text-gray-400 mt-2">
+                        )
 
-{
-order.created_at
-}
+                        : (
 
-</p>
+                            <div className="space-y-8 mt-16">
 
-</div>
+                                {
+                                    orders.map(
+                                        (
+                                            order,
+                                            orderIndex
+                                        ) => (
 
-<h2 className="text-violet-400 text-3xl font-bold">
+                                            <motion.div
+                                                key={order.id}
+                                                initial={{
+                                                    opacity: 0,
+                                                    y: 50
+                                                }}
+                                                animate={{
+                                                    opacity: 1,
+                                                    y: 0
+                                                }}
+                                                transition={{
+                                                    delay:
+                                                        orderIndex *
+                                                        0.05
+                                                }}
+                                                className="bg-white/5 border border-white/10 rounded-[35px] p-6 md:p-8 shadow-2xl backdrop-blur-2xl"
+                                            >
 
-₹{
-order.total
-}
+                                                {/* Top */}
+                                                <div className="flex flex-col lg:flex-row justify-between gap-6">
 
-</h2>
+                                                    <div>
 
-</div>
+                                                        <h2 className="text-white text-3xl font-bold">
 
-<div className="space-y-5">
+                                                            Order #
+                                                            {
+                                                                order.order_number
+                                                                || order.id
+                                                            }
 
-{
-order.items.map(
-(item,index)=>(
+                                                        </h2>
 
-<div
-key={index}
-className="bg-[#312B45] rounded-3xl p-5 border border-white/10"
->
+                                                        <p className="text-gray-400 mt-3">
 
-<div className="flex justify-between items-center">
+                                                            {
+                                                                order.created_at
+                                                            }
 
-<div>
+                                                        </p>
 
-<h3 className="text-white text-2xl font-bold">
+                                                        <p className="text-violet-400 mt-3 font-semibold">
 
-{
-item.food_name
-}
+                                                            Payment:
+                                                            {" "}
+                                                            {
+                                                                order.payment_method
+                                                            }
 
-</h3>
+                                                        </p>
 
-<p className="text-gray-400 mt-2">
+                                                    </div>
 
-Qty:
-{
-item.quantity
-}
+                                                    <div className="text-right">
 
-</p>
+                                                        <h2 className="text-violet-400 text-4xl font-bold">
 
-</div>
+                                                            ₹{
+                                                                order.total
+                                                            }
 
-<div className="text-right">
+                                                        </h2>
 
-<h2 className="text-violet-400 text-xl font-bold">
+                                                        <p className="text-gray-400 mt-2">
 
-₹
-{
-item.price *
-item.quantity
-}
+                                                            {
+                                                                order.payment_status
+                                                                || "Pending"
+                                                            }
 
-</h2>
+                                                        </p>
 
-<p className={`font-bold text-lg mt-3 ${getStatusColor(item.status)}`}>
+                                                    </div>
 
-{
-item.status
-}
+                                                </div>
 
-</p>
+                                                {/* Food List */}
+                                                <div className="space-y-5 mt-8">
 
-</div>
+                                                    {
+                                                        order.items.map(
+                                                            (
+                                                                item,
+                                                                index
+                                                            ) => (
 
-</div>
+                                                                <div
+                                                                    key={index}
+                                                                    className="bg-[#231b38] rounded-[30px] border border-white/10 p-5"
+                                                                >
 
-</div>
-))
-}
+                                                                    <div className="flex flex-col md:flex-row justify-between gap-5">
 
-</div>
+                                                                        <div>
 
-</div>
-))
-}
+                                                                            <h3 className="text-white text-2xl font-bold">
 
-</div>
-)
-}
+                                                                                {
+                                                                                    item.food_name
+                                                                                }
 
-</div>
+                                                                            </h3>
 
-</section>
+                                                                            <p className="text-gray-400 mt-2">
 
-</>
-);
+                                                                                Qty:
+                                                                                {" "}
+                                                                                {
+                                                                                    item.quantity
+                                                                                }
+
+                                                                            </p>
+
+                                                                        </div>
+
+                                                                        <div className="text-right">
+
+                                                                            <h3 className="text-violet-400 text-2xl font-bold">
+
+                                                                                ₹{
+                                                                                    item.price *
+                                                                                    item.quantity
+                                                                                }
+
+                                                                            </h3>
+
+                                                                            <p
+                                                                                className={`font-bold text-lg mt-3 ${getStatusColor(item.status)}`}
+                                                                            >
+
+                                                                                {
+                                                                                    item.status
+                                                                                }
+
+                                                                            </p>
+
+                                                                        </div>
+
+                                                                    </div>
+
+                                                                    {/* Progress */}
+                                                                    <div className="mt-5">
+
+                                                                        <div className="flex justify-between text-sm text-gray-400 mb-3">
+
+                                                                            <div className="flex items-center gap-2">
+
+                                                                                <Clock3
+                                                                                    size={16}
+                                                                                />
+
+                                                                                Pending
+
+                                                                            </div>
+
+                                                                            <div className="flex items-center gap-2">
+
+                                                                                <ChefHat
+                                                                                    size={16}
+                                                                                />
+
+                                                                                Preparing
+
+                                                                            </div>
+
+                                                                            <div className="flex items-center gap-2">
+
+                                                                                <CircleCheckBig
+                                                                                    size={16}
+                                                                                />
+
+                                                                                Completed
+
+                                                                            </div>
+
+                                                                        </div>
+
+                                                                        <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
+
+                                                                            <motion.div
+                                                                                initial={{
+                                                                                    width: 0
+                                                                                }}
+                                                                                animate={{
+                                                                                    width:
+`${getProgress(item.status)}%`
+                                                                                }}
+                                                                                transition={{
+                                                                                    duration: 0.5
+                                                                                }}
+                                                                                className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-full"
+                                                                            />
+
+                                                                        </div>
+
+                                                                    </div>
+
+                                                                </div>
+                                                            )
+                                                        )
+                                                    }
+
+                                                </div>
+
+                                            </motion.div>
+                                        )
+                                    )
+                                }
+
+                            </div>
+                        )
+                    }
+
+                </div>
+
+            </section>
+
+        </>
+    );
 }

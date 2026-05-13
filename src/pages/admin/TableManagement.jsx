@@ -1,205 +1,446 @@
-import React,
-{
-useEffect,
-useState
-}
-from "react";
+import React, {
+    useEffect,
+    useMemo,
+    useState
+} from "react";
+
+import {
+    motion
+} from "framer-motion";
+
+import {
+    Search,
+    Users
+} from "lucide-react";
 
 import AdminLayout
 from "../../layout/AdminLayout";
 
+const API_BASE =
+"https://restaurant-jagath.infinityfreeapp.com/restaurant-api";
+
 export default function TableManagement() {
 
-const [tables,
-setTables]
-=
-useState([]);
+    const [tables,
+        setTables]
+        =
+        useState([]);
 
-useEffect(() => {
+    const [search,
+        setSearch]
+        =
+        useState("");
 
-fetchTables();
+    const [statusFilter,
+        setStatusFilter]
+        =
+        useState("All");
 
-}, []);
+    const [loading,
+        setLoading]
+        =
+        useState(true);
 
-const fetchTables =
-async () => {
+    useEffect(() => {
 
-const response =
-await fetch(
-"https://restaurant-jagath.infinityfreeapp.com/restaurant-api/tables/getTables.php"
-);
+        fetchTables();
 
-const data =
-await response.json();
+        const interval =
+            setInterval(
+                fetchTables,
+                5000
+            );
 
-setTables(
-data
-);
-};
+        return () =>
+            clearInterval(
+                interval
+            );
 
-const updateStatus =
-async (
-id,
-status
-) => {
+    }, []);
 
-await fetch(
-"https://restaurant-jagath.infinityfreeapp.com/restaurant-api/tables/updateTableStatus.php",
-{
-method:"POST",
-headers:{
-"Content-Type":
-"application/json"
-},
-body:
-JSON.stringify({
-id,
-status
-})
-}
-);
+    const fetchTables =
+        async () => {
 
-fetchTables();
-};
+            try {
 
-const getColor =
-(status)=>{
+                const response =
+                    await fetch(
+`${API_BASE}/tables/getTables.php`
+                    );
 
-switch(status){
+                const data =
+                    await response.json();
 
-case "Available":
-return "bg-green-500";
+                setTables(
+                    Array.isArray(data)
+                    ? data
+                    : []
+                );
 
-case "Reserved":
-return "bg-yellow-500";
+            } catch(error){
 
-case "Occupied":
-return "bg-red-500";
+                console.log(
+                    error
+                );
 
-case "Maintenance":
-return "bg-gray-600";
+            } finally {
 
-default:
-return "bg-white";
-}
-};
+                setLoading(
+                    false
+                );
+            }
+        };
 
-return (
+    const updateStatus =
+        async (
+            id,
+            status
+        ) => {
 
-<AdminLayout>
+            try {
 
-<section>
+                await fetch(
+`${API_BASE}/tables/updateTableStatus.php`,
+                    {
+                        method:
+                            "POST",
 
-<h1 className="text-white text-6xl font-bold mb-10">
+                        headers:{
+                            "Content-Type":
+                            "application/json"
+                        },
 
-Table Management
+                        body:
+                        JSON.stringify({
+                            id,
+                            status
+                        })
+                    }
+                );
 
-</h1>
+                fetchTables();
 
-<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+            } catch(error){
 
-{
-tables.map(
-(table)=> (
+                console.log(
+                    error
+                );
+            }
+        };
 
-<div
-key={table.id}
-className="bg-white/5 border border-white/10 rounded-[35px] p-8 shadow-xl"
->
+    const getColor =
+        (status) => {
 
-<div className="flex justify-between items-center">
+            switch(status){
 
-<div>
+                case "Available":
+                    return
+"bg-green-500/20 text-green-400 border-green-500/20";
 
-<h2 className="text-white text-4xl font-bold">
+                case "Reserved":
+                    return
+"bg-yellow-500/20 text-yellow-400 border-yellow-500/20";
 
-Table {
-table.table_number
-}
+                case "Occupied":
+                    return
+"bg-red-500/20 text-red-400 border-red-500/20";
 
-</h2>
+                case "Maintenance":
+                    return
+"bg-gray-500/20 text-gray-400 border-gray-500/20";
 
-<p className="text-gray-400 mt-2">
+                default:
+                    return
+"bg-white/10 text-white";
+            }
+        };
 
-Capacity:
-{
-table.capacity
-}
+    const filteredTables =
+        useMemo(() => {
 
-</p>
+            return tables.filter(
+                table => {
 
-</div>
+                    const searchMatch =
+                        table.table_number
+                        ?.toString()
+                        .includes(
+                            search
+                        );
 
-<div className={`${getColor(table.status)} px-5 py-3 rounded-2xl text-white font-bold`}>
+                    const statusMatch =
+                        statusFilter ===
+                        "All"
 
-{
-table.status
-}
+                        ||
 
-</div>
+                        table.status ===
+                        statusFilter;
 
-</div>
+                    return (
+                        searchMatch
+                        &&
+                        statusMatch
+                    );
+                }
+            );
 
-<div className="grid grid-cols-2 gap-3 mt-8">
+        },[
+            tables,
+            search,
+            statusFilter
+        ]);
+            return (
 
-<button
-onClick={() =>
-updateStatus(
-table.id,
-"Available"
-)
-}
-className="bg-green-600 hover:bg-green-700 text-white py-3 rounded-2xl"
->
-Available
-</button>
+        <AdminLayout>
 
-<button
-onClick={() =>
-updateStatus(
-table.id,
-"Reserved"
-)
-}
-className="bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-2xl"
->
-Reserved
-</button>
+            <div className="space-y-8">
 
-<button
-onClick={() =>
-updateStatus(
-table.id,
-"Occupied"
-)
-}
-className="bg-red-600 hover:bg-red-700 text-white py-3 rounded-2xl"
->
-Occupied
-</button>
+                {/* Header */}
+                <div>
 
-<button
-onClick={() =>
-updateStatus(
-table.id,
-"Maintenance"
-)
-}
-className="bg-gray-600 hover:bg-gray-700 text-white py-3 rounded-2xl"
->
-Maintenance
-</button>
+                    <h1 className="text-white text-4xl md:text-6xl font-bold">
 
-</div>
+                        Table Management
 
-</div>
-))
-}
+                    </h1>
 
-</div>
+                    <p className="text-gray-400 mt-3 text-lg">
 
-</section>
+                        Realtime table monitoring
 
-</AdminLayout>
-);
+                    </p>
+
+                </div>
+
+                {/* Search + Filter */}
+                <div className="bg-white/5 border border-white/10 rounded-[35px] p-6 backdrop-blur-xl">
+
+                    {/* Search */}
+                    <div className="flex items-center bg-[#231b38] rounded-2xl px-5 py-4">
+
+                        <Search
+                            className="text-violet-400"
+                            size={20}
+                        />
+
+                        <input
+                            type="text"
+                            placeholder="Search table..."
+                            value={search}
+                            onChange={(e) =>
+                                setSearch(
+                                    e.target.value
+                                )
+                            }
+                            className="bg-transparent outline-none text-white ml-4 w-full"
+                        />
+
+                    </div>
+
+                    {/* Filters */}
+                    <div className="flex flex-wrap gap-3 mt-6">
+
+                        {[
+                            "All",
+                            "Available",
+                            "Reserved",
+                            "Occupied",
+                            "Maintenance"
+                        ].map(item => (
+
+                            <button
+                                type="button"
+                                key={item}
+                                onClick={() =>
+                                    setStatusFilter(
+                                        item
+                                    )
+                                }
+                                className={`px-5 py-3 rounded-2xl border duration-300
+                                ${
+                                    statusFilter === item
+                                    ? "bg-violet-600 border-violet-500 text-white"
+                                    : "bg-white/5 border-white/10 text-gray-300"
+                                }`}
+                            >
+
+                                {item}
+
+                            </button>
+                        ))}
+
+                    </div>
+
+                </div>
+
+                {/* Cards */}
+                {
+                    loading
+
+                    ? (
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+
+                            {
+                                [...Array(6)].map(
+                                    (_, i) => (
+
+                                        <div
+                                            key={i}
+                                            className="h-[300px] rounded-[35px] bg-white/5 animate-pulse"
+                                        />
+                                    )
+                                )
+                            }
+
+                        </div>
+
+                    )
+
+                    : (
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+
+                            {
+                                filteredTables.map(
+                                    (
+                                        table,
+                                        index
+                                    ) => (
+
+                                        <motion.div
+                                            key={table.id}
+                                            initial={{
+                                                opacity: 0,
+                                                y: 40
+                                            }}
+                                            animate={{
+                                                opacity: 1,
+                                                y: 0
+                                            }}
+                                            transition={{
+                                                delay:
+                                                    index *
+                                                    0.05
+                                            }}
+                                            className="bg-white/5 border border-white/10 rounded-[35px] p-8 backdrop-blur-xl hover:border-violet-500/20 duration-300"
+                                        >
+
+                                            {/* Top */}
+                                            <div className="flex justify-between items-start">
+
+                                                <div>
+
+                                                    <h2 className="text-white text-4xl font-bold">
+
+                                                        Table {
+                                                            table.table_number
+                                                        }
+
+                                                    </h2>
+
+                                                    <div className="flex items-center gap-2 mt-4 text-gray-400">
+
+                                                        <Users
+                                                            size={18}
+                                                            className="text-violet-400"
+                                                        />
+
+                                                        Capacity:
+                                                        {" "}
+                                                        {
+                                                            table.capacity
+                                                        }
+
+                                                    </div>
+
+                                                </div>
+
+                                                <div
+                                                    className={`px-5 py-3 rounded-2xl border font-semibold text-center ${getColor(table.status)}`}
+                                                >
+
+                                                    {
+                                                        table.status
+                                                    }
+
+                                                </div>
+
+                                            </div>
+
+                                            {/* Buttons */}
+                                            <div className="grid grid-cols-2 gap-3 mt-8">
+
+                                                <button
+                                                    onClick={() =>
+                                                        updateStatus(
+                                                            table.id,
+                                                            "Available"
+                                                        )
+                                                    }
+                                                    className="bg-green-600 hover:bg-green-700 py-4 rounded-2xl text-white font-medium duration-300"
+                                                >
+
+                                                    Available
+
+                                                </button>
+
+                                                <button
+                                                    onClick={() =>
+                                                        updateStatus(
+                                                            table.id,
+                                                            "Reserved"
+                                                        )
+                                                    }
+                                                    className="bg-yellow-500 hover:bg-yellow-600 py-4 rounded-2xl text-white font-medium duration-300"
+                                                >
+
+                                                    Reserved
+
+                                                </button>
+
+                                                <button
+                                                    onClick={() =>
+                                                        updateStatus(
+                                                            table.id,
+                                                            "Occupied"
+                                                        )
+                                                    }
+                                                    className="bg-red-600 hover:bg-red-700 py-4 rounded-2xl text-white font-medium duration-300"
+                                                >
+
+                                                    Occupied
+
+                                                </button>
+
+                                                <button
+                                                    onClick={() =>
+                                                        updateStatus(
+                                                            table.id,
+                                                            "Maintenance"
+                                                        )
+                                                    }
+                                                    className="bg-gray-600 hover:bg-gray-700 py-4 rounded-2xl text-white font-medium duration-300"
+                                                >
+
+                                                    Maintenance
+
+                                                </button>
+
+                                            </div>
+
+                                        </motion.div>
+                                    )
+                                )
+                            }
+
+                        </div>
+                    )
+                }
+
+            </div>
+
+        </AdminLayout>
+    );
 }

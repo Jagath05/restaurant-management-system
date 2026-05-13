@@ -1,449 +1,879 @@
-import React, { useState, useEffect } from "react";
-import AdminLayout from "../../layout/AdminLayout";
+import React, {
+    useEffect,
+    useMemo,
+    useState
+} from "react";
+
+import {
+    motion
+} from "framer-motion";
+
+import {
+    Search,
+    Pencil,
+    Trash2,
+    Eye,
+    EyeOff
+} from "lucide-react";
+
+import AdminLayout
+from "../../layout/AdminLayout";
+
+const API_BASE =
+"https://restaurant-jagath.infinityfreeapp.com/restaurant-api";
 
 export default function ManageMenu() {
 
-    const API_BASE =
-        "https://restaurant-jagath.infinityfreeapp.com/restaurant-api";
+    const [foods,
+        setFoods] =
+        useState([]);
 
-    const [food, setFood] = useState({
-        food_name: "",
-        category: "",
-        section: "",
-        food_type: "",
-        price: "",
-        image: null
-    });
+    const [loading,
+        setLoading] =
+        useState(false);
 
-    const [foods, setFoods] = useState([]);
-    const [editId, setEditId] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const [editId,
+        setEditId] =
+        useState(null);
 
-    // Input Change
-    const handleChange = (e) => {
+    const [search,
+        setSearch] =
+        useState("");
 
-        setFood({
-            ...food,
-            [e.target.name]: e.target.value
+    const [categoryFilter,
+        setCategoryFilter] =
+        useState("All");
+
+    const [typeFilter,
+        setTypeFilter] =
+        useState("All");
+
+    const [food,
+        setFood] =
+        useState({
+            food_name: "",
+            category: "",
+            section: "",
+            food_type: "",
+            price: "",
+            image: null,
+            available: 1
         });
-    };
 
-    // Image Upload
-    const handleImage = (e) => {
+    const handleChange =
+        (e) => {
 
-        setFood({
-            ...food,
-            image: e.target.files[0]
-        });
-    };
+            setFood({
+                ...food,
+                [e.target.name]:
+                    e.target.value
+            });
+        };
 
-    // Fetch Foods
-    const fetchFoods = async () => {
+    const handleImage =
+        (e) => {
 
-        try {
+            setFood({
+                ...food,
+                image:
+                    e.target.files[0]
+            });
+        };
 
-            const response = await fetch(
-                `${API_BASE}/menu/getFoods.php`
-            );
-
-            const text = await response.text();
-
-            console.log("Foods API:", text);
-
-            let data = [];
+    const fetchFoods =
+        async () => {
 
             try {
-                data = JSON.parse(text);
-            } catch {
 
-                console.log(
-                    "Invalid JSON:",
-                    text
-                );
+                const response =
+                    await fetch(
+`${API_BASE}/menu/getFoods.php`
+                    );
 
-                alert(
-                    "Backend returned invalid response"
-                );
+                const data =
+                    await response.json();
 
-                return;
-            }
-
-            setFoods(
-                Array.isArray(data)
+                setFoods(
+                    Array.isArray(data)
                     ? data
                     : []
-            );
+                );
 
-        } catch (error) {
+            } catch(error){
 
-            console.log(
-                "Fetch Error:",
-                error
-            );
-
-            alert(
-                "Failed to load menu"
-            );
-        }
-    };
+                console.log(
+                    error
+                );
+            }
+        };
 
     useEffect(() => {
+
         fetchFoods();
+
     }, []);
 
-    // Submit Form
-    const handleSubmit = async (e) => {
+    const filteredFoods =
+        useMemo(() => {
 
-        e.preventDefault();
+            return foods.filter(
+                item => {
 
-        if (
-            !food.food_name ||
-            !food.category ||
-            !food.price
-        ) {
-            alert(
-                "Please fill required fields"
-            );
-            return;
-        }
+                    const searchMatch =
+                        item.food_name
+                        ?.toLowerCase()
+                        .includes(
+                            search
+                            .toLowerCase()
+                        );
 
-        try {
+                    const categoryMatch =
+                        categoryFilter ===
+                        "All"
 
-            setLoading(true);
+                        ||
 
-            const formData =
-                new FormData();
+                        item.category ===
+                        categoryFilter;
 
-            formData.append(
-                "food_name",
-                food.food_name
-            );
+                    const typeMatch =
+                        typeFilter ===
+                        "All"
 
-            formData.append(
-                "category",
-                food.category
-            );
+                        ||
 
-            formData.append(
-                "section",
-                food.section
-            );
+                        item.food_type ===
+                        typeFilter;
 
-            formData.append(
-                "food_type",
-                food.food_type
+                    return (
+                        searchMatch &&
+                        categoryMatch &&
+                        typeMatch
+                    );
+                }
             );
 
-            formData.append(
-                "price",
-                food.price
-            );
+        }, [
+            foods,
+            search,
+            categoryFilter,
+            typeFilter
+        ]);
 
-            if (food.image) {
+    const handleSubmit =
+        async (e) => {
 
-                formData.append(
-                    "image",
-                    food.image
-                );
-            }
-
-            const apiURL =
-                editId
-                    ? `${API_BASE}/menu/updateFood.php`
-                    : `${API_BASE}/menu/addFood.php`;
-
-            if (editId) {
-
-                formData.append(
-                    "id",
-                    editId
-                );
-            }
-
-            const response =
-                await fetch(
-                    apiURL,
-                    {
-                        method: "POST",
-                        body: formData
-                    }
-                );
-
-            const text =
-                await response.text();
-
-            console.log(
-                "Submit API:",
-                text
-            );
-
-            let data;
+            e.preventDefault();
 
             try {
 
-                data =
-                    JSON.parse(text);
-
-            } catch {
-
-                alert(
-                    "Backend Error:\n" +
-                    text
+                setLoading(
+                    true
                 );
 
-                return;
+                const formData =
+                    new FormData();
+
+                formData.append(
+                    "food_name",
+                    food.food_name
+                );
+
+                formData.append(
+                    "category",
+                    food.category
+                );
+
+                formData.append(
+                    "section",
+                    food.section
+                );
+
+                formData.append(
+                    "food_type",
+                    food.food_type
+                );
+
+                formData.append(
+                    "price",
+                    food.price
+                );
+
+                formData.append(
+                    "available",
+                    food.available
+                );
+
+                if(
+                    food.image
+                ){
+
+                    formData.append(
+                        "image",
+                        food.image
+                    );
+                }
+
+                let url =
+`${API_BASE}/menu/addFood.php`;
+
+                if(editId){
+
+                    url =
+`${API_BASE}/menu/updateFood.php`;
+
+                    formData.append(
+                        "id",
+                        editId
+                    );
+                }
+
+                const response =
+                    await fetch(
+                        url,
+                        {
+                            method:
+                                "POST",
+                            body:
+                                formData
+                        }
+                    );
+
+                const data =
+                    await response.json();
+
+                if(
+                    data.success
+                ){
+
+                    alert(
+                        editId
+                        ? "Food Updated 🎉"
+                        : "Food Added 🎉"
+                    );
+
+                    setFood({
+                        food_name:"",
+                        category:"",
+                        section:"",
+                        food_type:"",
+                        price:"",
+                        image:null,
+                        available:1
+                    });
+
+                    setEditId(
+                        null
+                    );
+
+                    fetchFoods();
+                }
+
+            } catch(error){
+
+                console.log(
+                    error
+                );
+
+            } finally {
+
+                setLoading(
+                    false
+                );
             }
+        };
+            const deleteFood =
+        async (id) => {
 
-            if (data.success) {
-
-                alert(
-                    editId
-                        ? "Dish Updated Successfully 🎉"
-                        : "Food Added Successfully 🎉"
+            const confirmDelete =
+                window.confirm(
+                    "Delete this food?"
                 );
 
-                setFood({
-                    food_name: "",
-                    category: "",
-                    section: "",
-                    food_type: "",
-                    price: "",
-                    image: null
-                });
+            if(
+                !confirmDelete
+            ) return;
 
-                setEditId(null);
+            try {
+
+                await fetch(
+`${API_BASE}/menu/deleteFood.php?id=${id}`
+                );
+
+                alert(
+                    "Food Deleted"
+                );
 
                 fetchFoods();
 
-            } else {
+            } catch(error){
 
-                alert(
-                    data.message ||
-                    "Failed"
+                console.log(
+                    error
                 );
             }
+        };
 
-        } catch (error) {
+    const editFood =
+        (item) => {
 
-            console.log(error);
+            setFood({
+                food_name:
+                    item.food_name,
 
-            alert(
-                "Server Error: " +
-                error.message
+                category:
+                    item.category,
+
+                section:
+                    item.section,
+
+                food_type:
+                    item.food_type,
+
+                price:
+                    item.price,
+
+                image:
+                    null,
+
+                available:
+                    item.available
+            });
+
+            setEditId(
+                item.id
             );
 
-        } finally {
+            window.scrollTo({
+                top: 0,
+                behavior:
+                    "smooth"
+            });
+        };
 
-            setLoading(false);
-        }
-    };
+    const toggleAvailability =
+        async (item) => {
 
-    // Delete Food
-    const deleteFood = async (id) => {
+            try {
 
-        const confirmDelete =
-            window.confirm(
-                "Delete this food?"
-            );
+                const formData =
+                    new FormData();
 
-        if (!confirmDelete)
-            return;
+                formData.append(
+                    "id",
+                    item.id
+                );
 
-        try {
+                formData.append(
+                    "food_name",
+                    item.food_name
+                );
 
-            await fetch(
-                `${API_BASE}/menu/deleteFood.php?id=${id}`
-            );
+                formData.append(
+                    "category",
+                    item.category
+                );
 
-            alert(
-                "Food Deleted"
-            );
+                formData.append(
+                    "section",
+                    item.section
+                );
 
-            fetchFoods();
+                formData.append(
+                    "food_type",
+                    item.food_type
+                );
 
-        } catch (error) {
+                formData.append(
+                    "price",
+                    item.price
+                );
 
-            console.log(error);
+                formData.append(
+                    "available",
 
-            alert(
-                "Delete Failed"
-            );
-        }
-    };
+                    item.available ===
+                    "1"
 
-    // Edit Food
-    const editFood = (item) => {
+                    ? "0"
+                    : "1"
+                );
 
-        setFood({
-            food_name:
-                item.food_name,
+                await fetch(
+`${API_BASE}/menu/updateFood.php`,
+                    {
+                        method:
+                            "POST",
+                        body:
+                            formData
+                    }
+                );
 
-            category:
-                item.category,
+                fetchFoods();
 
-            section:
-                item.section,
+            } catch(error){
 
-            food_type:
-                item.food_type,
-
-            price:
-                item.price,
-
-            image: null
-        });
-
-        setEditId(
-            item.id
-        );
-
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-        });
-    };
+                console.log(
+                    error
+                );
+            }
+        };
 
     return (
+
         <AdminLayout>
 
-            <div>
+            <div className="space-y-10">
 
-                <h1 className="text-white text-5xl font-bold">
-                    Manage Menu
-                </h1>
+                {/* Header */}
+                <div>
 
-                <p className="text-gray-400 mt-3 text-lg">
-                    Add food dishes for customers
-                </p>
+                    <h1 className="text-white text-4xl md:text-6xl font-bold">
 
-                {/* FORM */}
+                        Manage Menu
+
+                    </h1>
+
+                    <p className="text-gray-400 mt-3 text-lg">
+
+                        Add and manage
+                        restaurant foods
+
+                    </p>
+
+                </div>
+
+                {/* Form */}
                 <form
-                    onSubmit={handleSubmit}
-                    className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10 bg-white/5 border border-white/10 rounded-[35px] p-8 backdrop-blur-xl"
+                    onSubmit={
+                        handleSubmit
+                    }
+                    className="grid md:grid-cols-2 gap-5 bg-white/5 border border-white/10 rounded-[35px] p-8 backdrop-blur-xl"
                 >
 
                     <input
                         type="text"
                         name="food_name"
                         placeholder="Food Name"
-                        value={food.food_name}
-                        onChange={handleChange}
-                        className="bg-[#312B45] border border-white/10 rounded-2xl p-5 text-white outline-none"
+                        value={
+                            food.food_name
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        className="bg-[#231b38] rounded-2xl p-5 text-white outline-none"
                     />
 
                     <input
                         type="number"
                         name="price"
                         placeholder="Price"
-                        value={food.price}
-                        onChange={handleChange}
-                        className="bg-[#312B45] border border-white/10 rounded-2xl p-5 text-white outline-none"
+                        value={
+                            food.price
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        className="bg-[#231b38] rounded-2xl p-5 text-white outline-none"
                     />
 
                     <select
                         name="category"
-                        value={food.category}
-                        onChange={handleChange}
-                        className="bg-[#312B45] border border-white/10 rounded-2xl p-5 text-white"
+                        value={
+                            food.category
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        className="bg-[#231b38] rounded-2xl p-5 text-white"
                     >
+
                         <option value="">
-                            Select Category
+                            Category
                         </option>
-                        <option>Breakfast</option>
-                        <option>Lunch</option>
-                        <option>Dinner</option>
-                        <option>Drinks</option>
-                        <option>Desserts</option>
+
+                        <option>
+                            Breakfast
+                        </option>
+
+                        <option>
+                            Lunch
+                        </option>
+
+                        <option>
+                            Dinner
+                        </option>
+
+                        <option>
+                            Drinks
+                        </option>
+
+                        <option>
+                            Desserts
+                        </option>
+
                     </select>
 
                     <select
                         name="section"
-                        value={food.section}
-                        onChange={handleChange}
-                        className="bg-[#312B45] border border-white/10 rounded-2xl p-5 text-white"
+                        value={
+                            food.section
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        className="bg-[#231b38] rounded-2xl p-5 text-white"
                     >
+
                         <option value="">
-                            Select Section
+                            Section
                         </option>
-                        <option>Starter</option>
-                        <option>Main Course</option>
-                        <option>Side Dish</option>
+
+                        <option>
+                            Starter
+                        </option>
+
+                        <option>
+                            Main Course
+                        </option>
+
+                        <option>
+                            Side Dish
+                        </option>
+
                     </select>
 
                     <select
                         name="food_type"
-                        value={food.food_type}
-                        onChange={handleChange}
-                        className="bg-[#312B45] border border-white/10 rounded-2xl p-5 text-white"
+                        value={
+                            food.food_type
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        className="bg-[#231b38] rounded-2xl p-5 text-white"
                     >
+
                         <option value="">
-                            Select Type
+                            Food Type
                         </option>
-                        <option>Veg</option>
-                        <option>Non-Veg</option>
+
+                        <option>
+                            Veg
+                        </option>
+
+                        <option>
+                            Non-Veg
+                        </option>
+
                     </select>
 
                     <input
                         type="file"
-                        onChange={handleImage}
-                        className="bg-[#312B45] border border-white/10 rounded-2xl p-5 text-white"
+                        onChange={
+                            handleImage
+                        }
+                        className="bg-[#231b38] rounded-2xl p-5 text-white"
                     />
 
                     <button
-                        disabled={loading}
-                        className="col-span-1 md:col-span-2 bg-violet-600 hover:bg-violet-700 py-5 rounded-2xl text-white text-xl font-bold duration-300"
+                        disabled={
+                            loading
+                        }
+                        className="md:col-span-2 bg-gradient-to-r from-violet-600 to-purple-700 py-5 rounded-2xl text-white font-bold text-lg"
                     >
-                        {loading
+
+                        {
+                            loading
+
                             ? "Processing..."
+
                             : editId
-                                ? "Update Dish"
-                                : "Add Dish"}
+
+                            ? "Update Food"
+
+                            : "Add Food"
+                        }
+
                     </button>
 
                 </form>
+                                {/* Filters */}
+                <div className="bg-white/5 border border-white/10 rounded-[35px] p-6 backdrop-blur-xl">
 
-                {/* FOOD LIST */}
-                <div className="mt-16">
+                    {/* Search */}
+                    <div className="flex items-center bg-[#231b38] rounded-2xl px-5 py-4">
 
-                    <h1 className="text-white text-4xl font-bold mb-8">
-                        Food List
-                    </h1>
+                        <Search
+                            className="text-violet-400"
+                            size={20}
+                        />
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                        <input
+                            type="text"
+                            placeholder="Search food..."
+                            value={search}
+                            onChange={(e) =>
+                                setSearch(
+                                    e.target.value
+                                )
+                            }
+                            className="bg-transparent outline-none text-white ml-4 w-full"
+                        />
 
-                        {foods.map((item) => (
+                    </div>
 
-                            <div
-                                key={item.id}
-                                className="bg-white/5 border border-white/10 rounded-[30px] overflow-hidden shadow-2xl"
+                    {/* Filter Buttons */}
+                    <div className="flex flex-wrap gap-3 mt-6">
+
+                        {[
+                            "All",
+                            "Breakfast",
+                            "Lunch",
+                            "Dinner",
+                            "Drinks",
+                            "Desserts"
+                        ].map(item => (
+
+                            <button
+                                key={item}
+                                onClick={() =>
+                                    setCategoryFilter(
+                                        item
+                                    )
+                                }
+                                className={`px-5 py-3 rounded-2xl border duration-300
+                                ${
+                                    categoryFilter === item
+                                    ? "bg-violet-600 border-violet-500 text-white"
+                                    : "bg-white/5 border-white/10 text-gray-300"
+                                }`}
                             >
 
-                                <img
-                                    src={`${API_BASE}/uploads/images/${item.image}`}
-                                    alt=""
-                                    className="w-full h-56 object-cover"
-                                />
+                                {item}
 
-                                <div className="p-6">
-
-                                    <h2 className="text-white text-2xl font-bold">
-                                        {item.food_name}
-                                    </h2>
-
-                                    <p className="text-gray-400 mt-2">
-                                        {item.category} • {item.section}
-                                    </p>
-
-                                    <p className="text-violet-400 text-2xl font-bold mt-4">
-                                        ₹{item.price}
-                                    </p>
-
-                                </div>
-
-                            </div>
+                            </button>
                         ))}
 
                     </div>
+
+                    {/* Veg Filter */}
+                    <div className="flex gap-3 mt-5">
+
+                        {[
+                            "All",
+                            "Veg",
+                            "Non-Veg"
+                        ].map(item => (
+
+                            <button
+                                key={item}
+                                onClick={() =>
+                                    setTypeFilter(
+                                        item
+                                    )
+                                }
+                                className={`px-5 py-3 rounded-2xl border duration-300
+                                ${
+                                    typeFilter === item
+                                    ? "bg-violet-600 border-violet-500 text-white"
+                                    : "bg-white/5 border-white/10 text-gray-300"
+                                }`}
+                            >
+
+                                {item}
+
+                            </button>
+                        ))}
+
+                    </div>
+
+                </div>
+
+                {/* Food Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+
+                    {
+                        filteredFoods.map(
+                            (
+                                item,
+                                index
+                            ) => (
+
+                                <motion.div
+                                    key={item.id}
+                                    initial={{
+                                        opacity: 0,
+                                        y: 40
+                                    }}
+                                    animate={{
+                                        opacity: 1,
+                                        y: 0
+                                    }}
+                                    transition={{
+                                        delay:
+                                            index *
+                                            0.05
+                                    }}
+                                    className="bg-white/5 border border-white/10 rounded-[35px] overflow-hidden backdrop-blur-xl hover:border-violet-500/30 duration-300"
+                                >
+
+                                    {/* Image */}
+                                    <img
+                                        src={
+`${API_BASE}/uploads/images/${item.image}`
+                                        }
+                                        alt=""
+                                        className="w-full h-60 object-cover"
+                                    />
+
+                                    {/* Content */}
+                                    <div className="p-6">
+
+                                        <div className="flex justify-between items-start">
+
+                                            <div>
+
+                                                <h2 className="text-white text-2xl font-bold capitalize">
+
+                                                    {
+                                                        item.food_name
+                                                    }
+
+                                                </h2>
+
+                                                <p className="text-gray-400 mt-2">
+
+                                                    {
+                                                        item.category
+                                                    }
+                                                    {" • "}
+                                                    {
+                                                        item.section
+                                                    }
+
+                                                </p>
+
+                                            </div>
+
+                                            <span
+                                                className={`px-4 py-2 rounded-full text-sm font-semibold
+                                                ${
+                                                    item.food_type === "Veg"
+                                                    ? "bg-green-500/20 text-green-400"
+                                                    : "bg-red-500/20 text-red-400"
+                                                }`}
+                                            >
+
+                                                {
+                                                    item.food_type
+                                                }
+
+                                            </span>
+
+                                        </div>
+
+                                        {/* Price */}
+                                        <h3 className="text-violet-400 text-3xl font-bold mt-5">
+
+                                            ₹{
+                                                item.price
+                                            }
+
+                                        </h3>
+
+                                        {/* Availability */}
+                                        <div className="mt-5">
+
+                                            <button
+                                                onClick={() =>
+                                                    toggleAvailability(
+                                                        item
+                                                    )
+                                                }
+                                                className={`flex items-center gap-3 px-5 py-3 rounded-2xl font-medium duration-300
+                                                ${
+                                                    item.available === "1"
+
+                                                    ? "bg-green-500/20 text-green-400"
+
+                                                    : "bg-red-500/20 text-red-400"
+                                                }`}
+                                            >
+
+                                                {
+                                                    item.available === "1"
+
+                                                    ? (
+                                                        <>
+                                                            <Eye
+                                                                size={18}
+                                                            />
+
+                                                            Available
+                                                        </>
+                                                    )
+
+                                                    : (
+                                                        <>
+                                                            <EyeOff
+                                                                size={18}
+                                                            />
+
+                                                            Hidden
+                                                        </>
+                                                    )
+                                                }
+
+                                            </button>
+
+                                        </div>
+
+                                        {/* Buttons */}
+                                        <div className="flex gap-3 mt-6">
+
+                                            <button
+                                                onClick={() =>
+                                                    editFood(
+                                                        item
+                                                    )
+                                                }
+                                                className="flex-1 bg-yellow-500 hover:bg-yellow-600 py-4 rounded-2xl text-white font-semibold flex items-center justify-center gap-2"
+                                            >
+
+                                                <Pencil
+                                                    size={18}
+                                                />
+
+                                                Edit
+
+                                            </button>
+
+                                            <button
+                                                onClick={() =>
+                                                    deleteFood(
+                                                        item.id
+                                                    )
+                                                }
+                                                className="flex-1 bg-red-600 hover:bg-red-700 py-4 rounded-2xl text-white font-semibold flex items-center justify-center gap-2"
+                                            >
+
+                                                <Trash2
+                                                    size={18}
+                                                />
+
+                                                Delete
+
+                                            </button>
+
+                                        </div>
+
+                                    </div>
+
+                                </motion.div>
+                            )
+                        )
+                    }
 
                 </div>
 

@@ -1,236 +1,355 @@
-import React, { useState } from "react";
+import React, {
+    useState,
+    useEffect
+} from "react";
+
 import {
-  Search,
-  Menu,
-  X,
-  ChefHat
+    Search,
+    Menu,
+    X
 } from "lucide-react";
 
 import {
-  Link,
-  NavLink
+    Link,
+    NavLink
 } from "react-router-dom";
+
+import {
+    motion,
+    AnimatePresence
+} from "framer-motion";
 
 export default function Navbar() {
 
-  const [openMenu, setOpenMenu] =
-    useState(false);
+    const [openMenu,
+        setOpenMenu] =
+        useState(false);
 
-  const navStyle =
-    ({ isActive }) =>
-      `relative px-4 py-2 rounded-full transition-all duration-500 text-[16px]
-      ${
-        isActive
-          ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/20 shadow-lg shadow-yellow-500/10 scale-105"
-          : "text-white hover:text-yellow-300 hover:scale-105"
-      }`;
+    const [scrolled,
+        setScrolled] =
+        useState(false);
 
-  return (
+    useEffect(() => {
 
-    <nav className="w-full sticky top-0 z-50 border-b border-white/10 bg-[#262235]/95 backdrop-blur-xl">
+        const handleScroll =
+            () => {
 
-      <div className="max-w-[1600px] mx-auto px-5 lg:px-10 py-5 flex items-center justify-between">
+                setScrolled(
+                    window.scrollY > 40
+                );
+            };
 
-        {/* LOGO */}
-        <Link
-          to="/"
-          className="flex items-center gap-3 shrink-0 hover:scale-105 duration-500"
+        window.addEventListener(
+            "scroll",
+            handleScroll
+        );
+
+        return () =>
+            window.removeEventListener(
+                "scroll",
+                handleScroll
+            );
+
+    }, []);
+
+    const navItems = [
+        ["Home", "/"],
+        ["Menu", "/breakfast"],
+        ["About Us", "/about"],
+        ["Reserve Table", "/reservation"],
+        ["Track Order", "/order-status"],
+        ["Feedback", "/feedback"]
+    ];
+
+    const navStyle =
+        ({ isActive }) =>
+            `relative px-5 py-3 rounded-2xl font-medium transition-all duration-500 text-[15px]
+        ${
+            isActive
+                ? "bg-violet-500/20 text-violet-300 border border-violet-500/30 shadow-[0_0_30px_rgba(124,58,237,0.25)]"
+                : "text-gray-300 hover:text-white hover:bg-white/5"
+        }`;
+
+    return (
+
+        <motion.nav
+            initial={{
+                y: -100,
+                opacity: 0
+            }}
+            animate={{
+                y: 0,
+                opacity: 1
+            }}
+            transition={{
+                duration: 0.7
+            }}
+            className={`fixed top-0 left-0 w-full z-50 transition-all duration-500
+            ${
+                scrolled
+                    ? "bg-[#140f22]/90 backdrop-blur-2xl border-b border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.4)]"
+                    : "bg-transparent"
+            }`}
         >
 
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-yellow-500 to-amber-700 flex items-center justify-center shadow-lg shadow-yellow-500/20">
+            {/* Floating Glow */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
 
-            <ChefHat
-              size={26}
-              className="text-white"
-            />
+                <div className="absolute -top-10 left-[10%] w-72 h-72 bg-violet-600/10 rounded-full blur-[120px]" />
 
-          </div>
+                <div className="absolute -top-10 right-[10%] w-72 h-72 bg-pink-600/10 rounded-full blur-[120px]" />
 
-          <div>
+            </div>
 
-            <h1 className="text-white text-xl sm:text-2xl font-bold tracking-wide">
+            <div className={`relative max-w-[1600px] mx-auto px-5 lg:px-10 flex items-center justify-between transition-all duration-500
+            ${
+                scrolled
+                    ? "h-[75px]"
+                    : "h-[95px]"
+            }`}>
 
-              Restaurant
+                {/* LOGO */}
+                <Link
+                    to="/"
+                    className="flex items-center gap-4 shrink-0 group"
+                >
 
-            </h1>
+                    {/* Crown */}
+                    <motion.div
+                        whileHover={{
+                            rotate: 8,
+                            scale: 1.08
+                        }}
+                        transition={{
+                            duration: 0.3
+                        }}
+                        className="relative w-14 h-14 rounded-3xl bg-gradient-to-br from-yellow-400 via-amber-500 to-yellow-600 flex items-center justify-center shadow-[0_0_40px_rgba(251,191,36,0.4)] overflow-hidden"
+                    >
 
-            <p className="text-gray-400 text-xs">
+                        {/* Glow */}
+                        <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 duration-500" />
 
-              Premium Dining
+                        {/* SVG Crown */}
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="white"
+                            className="w-7 h-7 relative z-10"
+                        >
+                            <path d="M5 16L3 7l5 4 4-6 4 6 5-4-2 9H5zm0 2h14v2H5v-2z" />
+                        </svg>
 
-            </p>
+                    </motion.div>
 
-          </div>
+                    {/* Brand */}
+                    <div>
 
-        </Link>
+                        <h1 className="text-white text-xl md:text-2xl font-bold tracking-wide">
 
-        {/* DESKTOP MENU */}
-        <ul className="hidden lg:flex items-center gap-4 xl:gap-4 lg:gap-2 -ml-9 font-medium absolute left-1/2 transform -translate-x-1/2">
+                            The Royal Taste
 
-          <li>
-            <NavLink
-              to="/"
-              className={navStyle}
-            >
-              Home
-            </NavLink>
-          </li>
+                        </h1>
 
-          <li>
-            <NavLink
-              to="/breakfast"
-              className={navStyle}
-            >
-              Menu
-            </NavLink>
-          </li>
+                        <p className="text-yellow-300 text-xs tracking-[3px] uppercase">
 
-          <li>
-            <NavLink
-              to="/about"
-              className={navStyle}
-            >
-              About Us
-            </NavLink>
-          </li>
+                            Luxury Dining
 
-          <li>
-            <NavLink
-              to="/reservation"
-              className={navStyle}
-            >
-              Reserve Table
-            </NavLink>
-          </li>
+                        </p>
 
-          <li>
-            <NavLink
-              to="/order-status"
-              className={navStyle}
-            >
-              Track Order
-            </NavLink>
-          </li>
+                    </div>
 
-          <li>
-            <NavLink
-              to="/feedback"
-              className={navStyle}
-            >
-              Feedback
-            </NavLink>
-          </li>
+                </Link>
 
-        </ul>
+                {/* DESKTOP MENU */}
+                <ul className="hidden xl:flex items-center gap-2">
 
-        {/* SEARCH */}
-        <div className="hidden md:flex items-center">
+                    {
+                        navItems.map(
+                            ([name, path]) => (
 
-          <div className="hidden lg:flex items-center bg-white/5 border border-white/10 px-5 py-3 rounded-2xl w-[290px] xl:w-[340px] shadow-lg hover:border-yellow-500/40 duration-500">
+                                <motion.li
+                                    whileHover={{
+                                        y: -2
+                                    }}
+                                    key={name}
+                                >
 
-            <Search
-              size={20}
-              className="text-yellow-400 shrink-0"
-            />
+                                    <NavLink
+                                        to={path}
+                                        className={
+                                            navStyle
+                                        }
+                                    >
 
-            <input
-              type="text"
-              placeholder="Search foods..."
-              className="bg-transparent outline-none text-white placeholder:text-gray-400 w-full ml-4"
-            />
+                                        {name}
 
-          </div>
+                                    </NavLink>
 
-          <button className="lg:hidden text-white hover:text-yellow-300 duration-300">
-
-            <Search size={26} />
-
-          </button>
-
-        </div>
-
-        {/* MOBILE BUTTON */}
-        <button
-          onClick={() =>
-            setOpenMenu(!openMenu)
-          }
-          className="lg:hidden text-white hover:text-yellow-300 duration-300"
-        >
-
-          {
-            openMenu
-              ? <X size={30} />
-              : <Menu size={30} />
-          }
-
-        </button>
-
-      </div>
-
-      {/* MOBILE MENU */}
-      <div
-        className={`lg:hidden overflow-hidden transition-all duration-500 ${
-          openMenu
-            ? "max-h-[700px] opacity-100"
-            : "max-h-0 opacity-0"
-        }`}
-      >
-
-        <div className="px-6 pb-6 bg-[#262235] border-t border-white/10">
-
-          {/* Mobile Search */}
-          <div className="flex items-center bg-white/5 border border-white/10 px-5 py-3 rounded-2xl mt-5">
-
-            <Search
-              size={20}
-              className="text-yellow-400"
-            />
-
-            <input
-              type="text"
-              placeholder="Search foods..."
-              className="bg-transparent outline-none text-white placeholder:text-gray-400 w-full ml-4"
-            />
-
-          </div>
-
-          {/* Mobile Links */}
-          <ul className="flex flex-col gap-4 mt-8">
-
-            {
-              [
-                ["Home", "/"],
-                ["Menu", "/breakfast"],
-                ["About Us", "/about"],
-                ["Reserve Table", "/reservation"],
-                ["Track Order", "/order-status"],
-                ["Feedback", "/feedback"]
-              ].map(([name, path]) => (
-
-                <li key={name}>
-
-                  <NavLink
-                    to={path}
-                    onClick={() =>
-                      setOpenMenu(false)
+                                </motion.li>
+                            )
+                        )
                     }
-                    className={navStyle}
-                  >
 
-                    {name}
+                </ul>
 
-                  </NavLink>
+                {/* RIGHT SIDE */}
+                <div className="hidden lg:flex items-center gap-5">
 
-                </li>
-              ))
-            }
+                    {/* Search */}
+                    <motion.div
+                        whileHover={{
+                            scale: 1.02
+                        }}
+                        className="hidden xl:flex items-center bg-white/5 border border-white/10 px-5 py-3 rounded-2xl w-[280px] hover:border-violet-500/40 transition-all duration-500"
+                    >
 
-          </ul>
+                        <Search
+                            size={18}
+                            className="text-violet-400"
+                        />
 
-        </div>
+                        <input
+                            type="text"
+                            placeholder="Search delicious food..."
+                            className="bg-transparent outline-none text-white placeholder:text-gray-500 ml-4 w-full"
+                        />
 
-      </div>
+                    </motion.div>
 
-    </nav>
-  );
+                    {/* CTA */}
+                    <motion.div
+                        whileHover={{
+                            scale: 1.05
+                        }}
+                        whileTap={{
+                            scale: 0.95
+                        }}
+                    >
+
+                       
+
+                    </motion.div>
+
+                </div>
+
+                {/* MOBILE BUTTON */}
+                <motion.button
+                    whileTap={{
+                        scale: 0.9
+                    }}
+                    onClick={() =>
+                        setOpenMenu(
+                            !openMenu
+                        )
+                    }
+                    className="lg:hidden text-white"
+                >
+
+                    {
+                        openMenu
+                            ? <X size={32} />
+                            : <Menu size={32} />
+                    }
+
+                </motion.button>
+
+            </div>
+
+            {/* MOBILE MENU */}
+            <AnimatePresence>
+
+                {
+                    openMenu && (
+
+                        <motion.div
+                            initial={{
+                                opacity: 0,
+                                y: -20
+                            }}
+                            animate={{
+                                opacity: 1,
+                                y: 0
+                            }}
+                            exit={{
+                                opacity: 0,
+                                y: -20
+                            }}
+                            transition={{
+                                duration: 0.3
+                            }}
+                            className="lg:hidden bg-[#140f22]/95 backdrop-blur-2xl border-t border-white/10 overflow-hidden"
+                        >
+
+                            <div className="px-5 py-6">
+
+                                {/* Mobile Search */}
+                                <div className="flex items-center bg-white/5 border border-white/10 px-5 py-4 rounded-2xl">
+
+                                    <Search
+                                        size={20}
+                                        className="text-violet-400"
+                                    />
+
+                                    <input
+                                        type="text"
+                                        placeholder="Search food..."
+                                        className="bg-transparent outline-none text-white placeholder:text-gray-500 w-full ml-4"
+                                    />
+
+                                </div>
+
+                                {/* Mobile Links */}
+                                <ul className="flex flex-col gap-3 mt-8">
+
+                                    {
+                                        navItems.map(
+                                            ([name, path]) => (
+
+                                                <motion.li
+                                                    initial={{
+                                                        opacity: 0,
+                                                        x: -30
+                                                    }}
+                                                    animate={{
+                                                        opacity: 1,
+                                                        x: 0
+                                                    }}
+                                                    transition={{
+                                                        duration: 0.3
+                                                    }}
+                                                    key={name}
+                                                >
+
+                                                    <NavLink
+                                                        to={path}
+                                                        onClick={() =>
+                                                            setOpenMenu(false)
+                                                        }
+                                                        className={navStyle}
+                                                    >
+
+                                                        {name}
+
+                                                    </NavLink>
+
+                                                </motion.li>
+                                            )
+                                        )
+                                    }
+
+                                </ul>
+
+                                {/* Mobile CTA */}
+                                
+
+                            </div>
+
+                        </motion.div>
+                    )
+                }
+
+            </AnimatePresence>
+
+        </motion.nav>
+    );
 }

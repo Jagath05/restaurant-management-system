@@ -1,148 +1,242 @@
-// Hero.jsx
+import React, {
+    useEffect,
+    useState
+} from "react";
 
-import React, { useEffect, useState } from 'react'
+import { motion } from "framer-motion";
 
-import IM1 from '../assets/img_1.jpg'
-import IM2 from '../assets/img_2.jpg'
-import IM3 from '../assets/img_3.jpg'
-import IM4 from '../assets/img_4.jpg'
-import { Menu } from 'lucide-react'
+import IM1 from "../assets/img_1.jpg";
+import IM2 from "../assets/img_2.jpg";
+import IM3 from "../assets/img_3.jpg";
+import IM4 from "../assets/img_4.jpg";
 
 export default function Hero() {
 
-    const imgs = [IM1, IM2, IM3, IM4]
+    const imgs = [
+        IM1,
+        IM2,
+        IM3,
+        IM4
+    ];
 
-    const [img, setimg] = useState(0)
+    const [img,
+        setImg] =
+        useState(0);
 
     useEffect(() => {
 
-        const slide = setInterval(() => {
+        const slide =
+            setInterval(() => {
 
-            setimg((p) => (p + 1) % imgs.length)
+                setImg(
+                    (prev) =>
+                        (prev + 1)
+                        % imgs.length
+                );
 
-        }, 5000)
+            }, 4000);
 
-        return () => clearInterval(slide)
+        return () =>
+            clearInterval(slide);
 
-    }, [])
+    }, []);
 
     return (
 
-        <>
-            <section className="min-h-screen bg-[#262235] relative overflow-hidden">
+        <section className="relative min-h-screen overflow-hidden bg-[#181325]">
 
-                {/* Background Glow */}
-                <div className="absolute top-0 left-0 w-full h-full">
+            {/* Premium Background Glow */}
+            <div className="absolute inset-0 overflow-hidden">
 
-                    <div className="absolute top-[10%] left-[10%] w-150 h-150 bg-violet-700/20 blur-[180px] rounded-full animate-pulse"></div>
+                <motion.div
+                    animate={{
+                        x: [0, 40, 0],
+                        y: [0, -30, 0]
+                    }}
+                    transition={{
+                        duration: 10,
+                        repeat: Infinity
+                    }}
+                    className="absolute top-[10%] left-[5%] w-[400px] h-[400px] bg-violet-700/20 rounded-full blur-[150px]"
+                />
 
-                    <div className="absolute bottom-[5%] right-[10%] w-125 h-125 bg-pink-600/20 blur-[180px] rounded-full animate-pulse"></div>
+                <motion.div
+                    animate={{
+                        x: [0, -40, 0],
+                        y: [0, 30, 0]
+                    }}
+                    transition={{
+                        duration: 12,
+                        repeat: Infinity
+                    }}
+                    className="absolute bottom-[10%] right-[5%] w-[350px] h-[350px] bg-pink-600/20 rounded-full blur-[150px]"
+                />
 
-                </div>
+            </div>
 
-                {/* Main Content */}
-                <div className="relative z-10 flex flex-col items-center justify-center text-center px-6 pt-32">
+            {/* Main Content */}
+            <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-5 pt-28 text-center">
 
-                    {/* Badge */}
-                    <div className="border border-white/10 bg-black/20 backdrop-blur-md px-8 py-3 rounded-full mb-10 shadow-2xl hover:scale-105 duration-500">
+                {/* Badge */}
+                <motion.div
+                    initial={{
+                        opacity: 0,
+                        y: -30
+                    }}
+                    animate={{
+                        opacity: 1,
+                        y: 0
+                    }}
+                    transition={{
+                        duration: 0.7
+                    }}
+                    className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-full px-6 md:px-8 py-3 shadow-2xl hover:scale-105 duration-500"
+                >
 
-                        <p className="text-[18px] text-gray-300 tracking-wide">
-                            Serving Food Lovers Since 2016 ❤️
-                        </p>
+                    <p className="text-sm md:text-lg text-gray-300">
 
-                    </div>
-
-                    {/* Heading */}
-                    <h1 className="text-white text-[75px] leading-22.5 font-bold max-w-250">
-
-                        Savor Every Bite. Savor
-                        <br />
-                        Every Moment.
-
-                    </h1>
-
-                    {/* Underline */}
-                    <div className="mt-4 mb-10">
-
-                        <svg
-                            width="520"
-                            height="22"
-                            viewBox="0 0 520 22"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <path
-                                d="M5 16C150 -2 320 -2 515 16"
-                                stroke="#7C3AED"
-                                strokeWidth="4"
-                                strokeLinecap="round"
-                            />
-                        </svg>
-
-                    </div>
-
-                    {/* Paragraph */}
-                    <p className="text-gray-300 text-[22px] leading-10.5 max-w-287.5">
-
-                        Welcome to a dining experience where flavor,
-                        freshness, and hospitality come together.
-                        Whether it's your first visit or your hundredth,
-                        every plate is made to impress.
+                        Serving Food Lovers Since 2016 ❤️
 
                     </p>
 
-                    {/* Button */}
-                    <button  className="mt-14 bg-violet-600 hover:bg-violet-700 hover:scale-105 duration-500 text-white text-[20px] font-medium px-12 py-5 rounded-2xl shadow-2xl flex items-center gap-4 group overflow-hidden relative">
+                </motion.div>
+
+                {/* Heading */}
+                <motion.h1
+                    initial={{
+                        opacity: 0,
+                        y: 60
+                    }}
+                    animate={{
+                        opacity: 1,
+                        y: 0
+                    }}
+                    transition={{
+                        duration: 0.8
+                    }}
+                    className="mt-8 text-white font-bold leading-tight max-w-6xl text-[42px] sm:text-[55px] md:text-[75px]"
+                >
+
+                    Savor Every Bite.
+                    <br />
+
+                    <span className="text-violet-400">
+
+                        Savor Every Moment.
+
+                    </span>
+
+                </motion.h1>
+
+                {/* Description */}
+                <motion.p
+                    initial={{
+                        opacity: 0
+                    }}
+                    animate={{
+                        opacity: 1
+                    }}
+                    transition={{
+                        delay: 0.4
+                    }}
+                    className="text-gray-300 text-base sm:text-lg md:text-xl mt-8 max-w-3xl leading-8"
+                >
+
+                    Welcome to a dining experience
+                    where flavor, freshness,
+                    and hospitality come together.
+                    Every dish is crafted to
+                    delight your taste buds.
+
+                </motion.p>
+
+                {/* CTA */}
+                <motion.div
+                    initial={{
+                        opacity: 0,
+                        y: 30
+                    }}
+                    animate={{
+                        opacity: 1,
+                        y: 0
+                    }}
+                    transition={{
+                        delay: 0.5
+                    }}
+                >
+
+                    <a
+                        href="#menu"
+                        className="group relative inline-flex items-center gap-3 mt-10 bg-violet-600 hover:bg-violet-700 px-8 md:px-12 py-4 md:py-5 rounded-2xl text-white text-lg md:text-xl font-semibold overflow-hidden shadow-[0_0_40px_rgba(124,58,237,0.4)] hover:scale-105 duration-500"
+                    >
 
                         <span className="relative z-10">
-                            <a href="#menu" >Experience the Flavor</a>
+
+                            Experience The Flavor
+
                         </span>
 
-                        <span className="text-2xl relative z-10 group-hover:translate-x-2 duration-500">
+                        <span className="group-hover:translate-x-2 duration-500 text-2xl">
+
                             →
+
                         </span>
 
-                        {/* Glow Animation */}
-                        <div className="absolute inset-0 bg-white/10 scale-0 group-hover:scale-150 rounded-full duration-700"></div>
+                        <div className="absolute inset-0 bg-white/10 scale-0 group-hover:scale-150 duration-700 rounded-full" />
 
-                    </button>
+                    </a>
 
-                    {/* Image Slider */}
-                    <div className="mt-24 p-2 mb-20 relative group">
+                </motion.div>
 
-                        {/* Outer Glow */}
-                        <div className="absolute inset-0 bg-violet-600/30 blur-[80px] rounded-[40px] opacity-70 group-hover:opacity-100 duration-700"></div>
+                {/* Food Image */}
+                <motion.div
+                    initial={{
+                        opacity: 0,
+                        y: 50
+                    }}
+                    animate={{
+                        opacity: 1,
+                        y: [0, -10, 0]
+                    }}
+                    transition={{
+                        duration: 5,
+                        repeat: Infinity
+                    }}
+                    className="relative mt-16 md:mt-24 w-full max-w-6xl"
+                >
 
-                        {/* Floating Border */}
-                        <div className="absolute -inset-0.5 bg-linear-to-r from-violet-500 via-pink-500 to-violet-500 rounded-[40px] blur-sm opacity-50 group-hover:opacity-100 duration-700 animate-pulse"></div>
+                    {/* Glow */}
+                    <div className="absolute inset-0 bg-violet-600/20 blur-[90px] rounded-[40px]" />
 
-                        {/* Image */}
-                        <div className="relative overflow-hidden rounded-[40px] border border-white/10 shadow-2xl">
+                    {/* Image Card */}
+                    <div className="relative overflow-hidden rounded-[35px] border border-white/10 shadow-[0_0_50px_rgba(124,58,237,0.25)]">
 
-                            <img
-                                src={imgs[img]}
-                                alt=""
-                                className='w-300 h-162.5 object-cover transition-all duration-2500 ease-in-out group-hover:scale-110'
-                            />
+                        <motion.img
+                            key={img}
+                            initial={{
+                                opacity: 0,
+                                scale: 1.1
+                            }}
+                            animate={{
+                                opacity: 1,
+                                scale: 1
+                            }}
+                            transition={{
+                                duration: 0.8
+                            }}
+                            src={imgs[img]}
+                            alt="Food"
+                            className="w-full h-[280px] sm:h-[420px] md:h-[650px] object-cover hover:scale-105 duration-[3000ms]"
+                        />
 
-                            {/* Overlay */}
-                            <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent"></div>
-
-                        </div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
                     </div>
 
-                </div>
+                </motion.div>
 
-            </section>
-
-            {/* Bottom Glow */}
-            <div className="h-52 bg-violet-700/10 blur-[120px]">
-            
-            
             </div>
 
-          
-        </>
-    )
+        </section>
+    );
 }

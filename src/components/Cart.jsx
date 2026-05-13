@@ -1,407 +1,580 @@
-import React,
-{
-useContext,
-useState
-}
-from "react";
+import React, {
+    useContext,
+    useState
+} from "react";
 
 import {
-Trash2,
-X
-}
-from "lucide-react";
+    motion,
+    AnimatePresence
+} from "framer-motion";
 
 import {
-CartContext
-}
-from "../context/CartContext";
+    Trash2,
+    X,
+    ShoppingBag,
+    Minus,
+    Plus
+} from "lucide-react";
+
+import {
+    CartContext
+} from "../context/CartContext";
+
+const FALLBACK_IMAGE =
+"https://images.unsplash.com/photo-1544025162-d76694265947?w=1200&q=80";
 
 export default function Cart() {
 
-const {
-cart,
-increaseQty,
-decreaseQty,
-subtotal,
-tax,
-total,
-clearCart,
-showCart,
-setShowCart
-}
-=
-useContext(
-CartContext
-);
+    const {
+        cart,
+        increaseQty,
+        decreaseQty,
+        subtotal,
+        tax,
+        total,
+        clearCart,
+        showCart,
+        setShowCart
+    } =
+    useContext(
+        CartContext
+    );
 
-const [payment,
-setPayment]
-=
-useState("UPI");
+    const [payment,
+        setPayment] =
+        useState("UPI");
 
-const [loading,
-setLoading]
-=
-useState(false);
+    const [loading,
+        setLoading] =
+        useState(false);
 
-if(!showCart)
-return null;
+    const handleOrder =
+        async () => {
 
-const handleOrder =
-async () => {
+            if (
+                cart.length ===
+                0
+            ) {
 
-if(cart.length === 0){
+                alert(
+                    "Cart is empty"
+                );
 
-alert(
-"Cart is empty"
-);
+                return;
+            }
 
-return;
-}
+            const tableNumber =
+                localStorage.getItem(
+                    "tableNumber"
+                );
 
-const tableNumber =
-localStorage.getItem(
-"tableNumber"
-);
+            if (
+                !tableNumber
+            ) {
 
-if(!tableNumber){
+                alert(
+                    "Tablet not assigned to table"
+                );
 
-alert(
-"Tablet not assigned to table"
-);
+                return;
+            }
 
-return;
-}
+            try {
 
-setLoading(true);
+                setLoading(
+                    true
+                );
 
-const response =
-await fetch(
+                const response =
+                    await fetch(
 "https://restaurant-jagath.infinityfreeapp.com/restaurant-api/orders/placeOrder.php",
-{
-method: "POST",
-headers: {
-"Content-Type":
-"application/json"
-},
-body:
-JSON.stringify({
+                        {
+                            method:
+                                "POST",
 
-customer_name:
-"Guest",
+                            headers:
+                            {
+                                "Content-Type":
+                                    "application/json"
+                            },
 
-table_number:
-tableNumber,
+                            body:
+                                JSON.stringify(
+                                    {
+                                        customer_name:
+                                            "Guest",
 
-items:
-cart,
+                                        table_number:
+                                            tableNumber,
 
-subtotal,
+                                        items:
+                                            cart,
 
-tax,
+                                        subtotal,
 
-total,
+                                        tax,
 
-payment_method:
-payment
+                                        total,
 
-})
-}
-);
+                                        payment_method:
+                                            payment
+                                    }
+                                )
+                        }
+                    );
 
-const data =
-await response.json();
+                const data =
+                    await response.json();
 
-setLoading(false);
+                if (
+                    data.success
+                ) {
 
-if(data.success){
+                    localStorage.setItem(
+                        "latestOrderId",
+                        data.order_id
+                    );
 
-// SAVE ORDER ID
-localStorage.setItem(
-"latestOrderId",
-data.order_id
-);
-
-alert(
+                    alert(
 `Order Placed Successfully 🎉
 
-Order ID:
-#${data.order_id}
+Order ID: #${data.order_id}`
+                    );
+
+                    clearCart();
+
+                    setShowCart(
+                        false
+                    );
+
+                } else {
+
+                    alert(
+                        "Order Failed"
+                    );
+                }
+
+            } catch (
+                error
+            ) {
+
+                console.log(
+                    error
+                );
+
+                alert(
+                    "Something went wrong"
+                );
+
+            } finally {
+
+                setLoading(
+                    false
+                );
+            }
+        };
 
-Admin Notified`
-);
+    return (
+
+        <AnimatePresence>
+
+            {
+                showCart && (
 
-clearCart();
+                    <>
 
-setShowCart(false);
+                        {/* Overlay */}
+                        <motion.div
+                            initial={{
+                                opacity: 0
+                            }}
+                            animate={{
+                                opacity: 1
+                            }}
+                            exit={{
+                                opacity: 0
+                            }}
+                            onClick={() =>
+                                setShowCart(
+                                    false
+                                )
+                            }
+                            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998]"
+                        />
 
-}else{
+                        {/* Cart Drawer */}
+                        <motion.div
+                            initial={{
+                                x: "100%"
+                            }}
+                            animate={{
+                                x: 0
+                            }}
+                            exit={{
+                                x: "100%"
+                            }}
+                            transition={{
+                                type: "spring",
+                                damping: 22
+                            }}
+                            className="fixed top-0 right-0 h-screen w-full sm:w-[450px] bg-[#181325]/95 backdrop-blur-2xl border-l border-white/10 z-[9999] shadow-[0_0_60px_rgba(124,58,237,0.15)] flex flex-col"
+                        >
 
-alert(
-"Order Failed"
-);
-}
-};
+                            {/* Header */}
+                            <div className="p-6 border-b border-white/10">
 
-return (
+                                <div className="flex justify-between items-center">
 
-<div className="fixed top-0 right-0 h-screen w-112.5 bg-[#262235] border-l border-white/10 z-99999 shadow-2xl p-6 overflow-y-auto">
+                                    <div>
 
-<div className="flex justify-between items-center mb-8">
+                                        <h2 className="text-white text-3xl font-bold">
 
-<div>
+                                            Your Order
 
-<h2 className="text-white text-4xl font-bold">
+                                        </h2>
 
-Your Order
+                                        <p className="text-gray-400 mt-1">
 
-</h2>
+                                            {
+                                                cart.length
+                                            } items
+                                        </p>
 
-<p className="text-gray-400">
+                                    </div>
 
-{cart.length} items
+                                    <button
+                                        onClick={() =>
+                                            setShowCart(
+                                                false
+                                            )
+                                        }
+                                        className="w-12 h-12 rounded-2xl bg-white/5 hover:bg-red-500/20 flex items-center justify-center duration-300"
+                                    >
 
-</p>
+                                        <X
+                                            size={28}
+                                            className="text-white"
+                                        />
 
-</div>
+                                    </button>
 
-<button
-onClick={() =>
-setShowCart(false)
-}
-className="text-white hover:text-red-400"
->
+                                </div>
 
-<X size={32} />
+                            </div>
 
-</button>
+                            {/* Body */}
+                            <div className="flex-1 overflow-y-auto px-5 py-5">
 
-</div>
+                                {
+                                    cart.length ===
+                                    0
 
-{
-cart.length === 0
+                                    ? (
 
-? (
+                                        <div className="h-full flex flex-col items-center justify-center text-center">
 
-<div className="text-center mt-20">
+                                            <ShoppingBag
+                                                size={70}
+                                                className="text-violet-400 mb-5"
+                                            />
 
-<h2 className="text-white text-3xl">
+                                            <h2 className="text-white text-3xl font-bold">
 
-Empty Cart 🍽️
+                                                Empty Cart 🍽️
 
-</h2>
+                                            </h2>
 
-<p className="text-gray-400 mt-3">
+                                            <p className="text-gray-400 mt-3">
 
-Add foods to continue
+                                                Add delicious food
+                                                to continue
+                                            </p>
 
-</p>
+                                        </div>
 
-</div>
+                                    )
 
-)
+                                    : (
 
-: (
+                                        <div className="space-y-5">
 
-<>
+                                            {
+                                                cart.map(
+                                                    item => {
 
-<div className="space-y-5">
+                                                        const image =
+item.image
+? `https://restaurant-jagath.infinityfreeapp.com/restaurant-api/uploads/images/${item.image}`
+: FALLBACK_IMAGE;
 
-{
-cart.map(
-item => (
+                                                        return (
 
-<div
-key={item.id}
-className="bg-white/5 border border-white/10 rounded-3xl p-4"
->
+                                                            <motion.div
+                                                                layout
+                                                                key={item.id}
+                                                                className="bg-white/5 border border-white/10 rounded-[30px] p-4 backdrop-blur-xl"
+                                                            >
 
-<img
-src={`https://restaurant-jagath.infinityfreeapp.com/restaurant-api/uploads/images/${item.image}`}
-alt=""
-className="w-full h-40 rounded-2xl object-cover"
-/>
+                                                                <div className="flex gap-4">
 
-<div className="mt-4">
+                                                                    {/* Image */}
+                                                                    <img
+                                                                        src={image}
+                                                                        onError={(e) => {
+                                                                            e.target.src =
+                                                                                FALLBACK_IMAGE;
+                                                                        }}
+                                                                        alt=""
+                                                                        className="w-28 h-28 rounded-3xl object-cover"
+                                                                    />
 
-<div className="flex justify-between">
+                                                                    {/* Content */}
+                                                                    <div className="flex-1">
 
-<h3 className="text-white text-xl font-bold">
+                                                                        <div className="flex justify-between">
 
-{item.food_name}
+                                                                            <div>
 
-</h3>
+                                                                                <h3 className="text-white text-lg font-bold capitalize">
 
-<Trash2
-className="text-red-400 cursor-pointer"
-onClick={() =>
-decreaseQty(item.id)
-}
-/>
+                                                                                    {
+                                                                                        item.food_name
+                                                                                    }
 
-</div>
+                                                                                </h3>
 
-<p className="text-violet-400 mt-2">
+                                                                                <p className="text-violet-400 mt-1 font-semibold">
 
-₹{item.price}
+                                                                                    ₹
+                                                                                    {
+                                                                                        item.price
+                                                                                    }
 
-</p>
+                                                                                </p>
 
-<div className="flex items-center justify-between mt-5">
+                                                                            </div>
 
-<div className="flex items-center gap-4">
+                                                                            <button
+                                                                                onClick={() =>
+                                                                                    decreaseQty(
+                                                                                        item.id
+                                                                                    )
+                                                                                }
+                                                                            >
 
-<button
-onClick={() =>
-decreaseQty(item.id)
-}
-className="bg-red-500 w-10 h-10 rounded-full text-white"
->
--
-</button>
+                                                                                <Trash2
+                                                                                    className="text-red-400 hover:text-red-300 duration-300"
+                                                                                    size={20}
+                                                                                />
 
-<span className="text-white text-xl font-bold">
+                                                                            </button>
 
-{item.quantity}
+                                                                        </div>
 
-</span>
+                                                                        {/* Qty */}
+                                                                        <div className="flex justify-between items-center mt-5">
 
-<button
-onClick={() =>
-increaseQty(item.id)
-}
-className="bg-green-500 w-10 h-10 rounded-full text-white"
->
-+
-</button>
+                                                                            <div className="flex items-center gap-3 bg-white/5 rounded-2xl px-3 py-2">
 
-</div>
+                                                                                <button
+                                                                                    onClick={() =>
+                                                                                        decreaseQty(
+                                                                                            item.id
+                                                                                        )
+                                                                                    }
+                                                                                    className="w-9 h-9 rounded-xl bg-red-500 hover:scale-105 duration-300 text-white flex items-center justify-center"
+                                                                                >
 
-<h2 className="text-white text-xl font-bold">
+                                                                                    <Minus
+                                                                                        size={18}
+                                                                                    />
 
-₹{
-item.price *
-item.quantity
-}
+                                                                                </button>
 
-</h2>
+                                                                                <span className="text-white font-bold text-lg w-8 text-center">
 
-</div>
+                                                                                    {
+                                                                                        item.quantity
+                                                                                    }
 
-</div>
+                                                                                </span>
 
-</div>
-))
-}
+                                                                                <button
+                                                                                    onClick={() =>
+                                                                                        increaseQty(
+                                                                                            item.id
+                                                                                        )
+                                                                                    }
+                                                                                    className="w-9 h-9 rounded-xl bg-green-500 hover:scale-105 duration-300 text-white flex items-center justify-center"
+                                                                                >
 
-</div>
+                                                                                    <Plus
+                                                                                        size={18}
+                                                                                    />
 
-<div className="mt-8">
+                                                                                </button>
 
-<label className="text-white text-lg">
+                                                                            </div>
 
-Payment Method
+                                                                            <h2 className="text-white text-xl font-bold">
 
-</label>
+                                                                                ₹
+                                                                                {
+                                                                                    (
+                                                                                        item.price *
+                                                                                        item.quantity
+                                                                                    ).toFixed(
+                                                                                        2
+                                                                                    )
+                                                                                }
 
-<select
-value={payment}
-onChange={(e) =>
-setPayment(
-e.target.value
-)
-}
-className="w-full mt-3 bg-[#312B45] border border-white/10 rounded-2xl p-4 text-white"
->
+                                                                            </h2>
 
-<option>
-UPI
-</option>
+                                                                        </div>
 
-<option>
-Card
-</option>
+                                                                    </div>
 
-<option>
-Cash
-</option>
+                                                                </div>
 
-<option>
-Net Banking
-</option>
+                                                            </motion.div>
+                                                        );
+                                                    }
+                                                )
+                                            }
 
-</select>
+                                        </div>
+                                    )
+                                }
 
-</div>
+                            </div>
 
-<div className="mt-8 border-t border-white/10 pt-6">
+                            {/* Footer */}
+                            {
+                                cart.length > 0 && (
 
-<div className="flex justify-between text-gray-300 mb-3">
+                                    <div className="border-t border-white/10 p-6 bg-[#1f1830]">
 
-<span>
-Subtotal
-</span>
+                                        {/* Payment */}
+                                        <label className="text-white font-medium">
 
-<span>
-₹{
-subtotal.toFixed(2)
-}
-</span>
+                                            Payment Method
 
-</div>
+                                        </label>
 
-<div className="flex justify-between text-gray-300 mb-3">
+                                        <select
+                                            value={payment}
+                                            onChange={(e) =>
+                                                setPayment(
+                                                    e.target.value
+                                                )
+                                            }
+                                            className="w-full mt-3 bg-[#312B45] border border-white/10 rounded-2xl p-4 text-white outline-none"
+                                        >
 
-<span>
-GST (5%)
-</span>
+                                            <option>
+                                                UPI
+                                            </option>
 
-<span>
-₹{
-tax.toFixed(2)
-}
-</span>
+                                            <option>
+                                                Card
+                                            </option>
 
-</div>
+                                            <option>
+                                                Cash
+                                            </option>
 
-<div className="flex justify-between text-white text-3xl font-bold mt-6">
+                                            <option>
+                                                Net Banking
+                                            </option>
 
-<span>
-Total
-</span>
+                                        </select>
 
-<span>
-₹{
-total.toFixed(2)
-}
-</span>
+                                        {/* Summary */}
+                                        <div className="mt-6 space-y-3">
 
-</div>
+                                            <div className="flex justify-between text-gray-400">
 
-<button
-onClick={
-handleOrder
-}
-disabled={
-loading
-}
-className="w-full mt-8 bg-violet-600 hover:bg-violet-700 py-5 rounded-2xl text-white text-xl font-bold"
->
+                                                <span>
+                                                    Subtotal
+                                                </span>
 
-{
-loading
-? "Placing Order..."
-: "Proceed Order →"
-}
+                                                <span>
+                                                    ₹
+                                                    {
+                                                        subtotal.toFixed(
+                                                            2
+                                                        )
+                                                    }
+                                                </span>
 
-</button>
+                                            </div>
 
-</div>
+                                            <div className="flex justify-between text-gray-400">
 
-</>
-)
-}
+                                                <span>
+                                                    GST (5%)
+                                                </span>
 
-</div>
-);
+                                                <span>
+                                                    ₹
+                                                    {
+                                                        tax.toFixed(
+                                                            2
+                                                        )
+                                                    }
+                                                </span>
+
+                                            </div>
+
+                                            <div className="flex justify-between text-white text-2xl font-bold pt-3 border-t border-white/10">
+
+                                                <span>
+                                                    Total
+                                                </span>
+
+                                                <span className="text-violet-400">
+
+                                                    ₹
+                                                    {
+                                                        total.toFixed(
+                                                            2
+                                                        )
+                                                    }
+                                                </span>
+
+                                            </div>
+
+                                        </div>
+
+                                        {/* Order */}
+                                        <button
+                                            onClick={
+                                                handleOrder
+                                            }
+                                            disabled={
+                                                loading
+                                            }
+                                            className="w-full mt-6 bg-gradient-to-r from-violet-600 to-purple-700 hover:from-violet-500 hover:to-purple-600 py-5 rounded-2xl text-white text-lg font-bold shadow-[0_0_30px_rgba(124,58,237,0.35)] hover:scale-[1.02] duration-300"
+                                        >
+
+                                            {
+                                                loading
+                                                ? "Placing Order..."
+                                                : "Proceed Order →"
+                                            }
+
+                                        </button>
+
+                                    </div>
+                                )
+                            }
+
+                        </motion.div>
+
+                    </>
+                )
+            }
+
+        </AnimatePresence>
+    );
 }

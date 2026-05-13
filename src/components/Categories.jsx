@@ -48,7 +48,7 @@ export default function Categories() {
 
     return (
 
-        <section    id="menu" className="bg-[#262235] px-10 -mt-52 pb-20">
+        <section    id="menu" className="bg-[#262235] px-10 pt-10 pb-20">
 
             {/* Heading */}
             <h1 className="text-white text-[65px] font-bold">
@@ -72,12 +72,12 @@ export default function Categories() {
                         >
 
                             {/* Image */}
-                            <div className="bg-yellow-100 p-4 rounded-3xl overflow-hidden">
+                            <div className="bg-yellow-100  rounded-3xl overflow-hidden">
 
                                 <img
                                     src={item.image}
                                     alt=""
-                                    className="w-27.5 h-27.5 object-cover group-hover:scale-110 duration-500"
+                                    className="w-37.5 h-27.5 object-cover group-hover:scale-110 duration-500"
                                 />
 
                             </div>
