@@ -7,6 +7,10 @@ import {
     motion
 } from "framer-motion";
 
+import {
+    useNavigate
+} from "react-router-dom";
+
 const API_URL =
 "https://restaurant-jagath.infinityfreeapp.com/restaurant-api/menu/getFoods.php";
 
@@ -17,6 +21,8 @@ const FALLBACK_IMAGE =
 "https://images.unsplash.com/photo-1544025162-d76694265947?w=1200&q=80";
 
 export default function PopularFoods() {
+    const navigate =
+    useNavigate();
 
     const [foods,
         setFoods] =
@@ -259,11 +265,24 @@ export default function PopularFoods() {
 
                                                         </span>
 
-                                                        <button className="bg-violet-600 hover:bg-violet-700 px-5 py-3 rounded-2xl text-white font-semibold hover:scale-105 duration-500">
+                                                       <button
+    onClick={() => {
 
-                                                            Order Now
+        navigate(
+            `/${food.category.toLowerCase()}`
+        );
 
-                                                        </button>
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    }}
+    className="bg-violet-600 hover:bg-violet-700 px-5 py-3 rounded-2xl text-white font-semibold hover:scale-105 duration-500"
+>
+
+    Order Now →
+
+</button>
 
                                                     </div>
 

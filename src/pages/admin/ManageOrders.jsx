@@ -45,7 +45,7 @@ export default function ManageOrders() {
         const interval =
             setInterval(
                 fetchOrders,
-                5000
+                2000
             );
 
         return () =>
@@ -88,84 +88,82 @@ export default function ManageOrders() {
             }
         };
 
-    const updateFoodStatus =
-        async (
-            orderId,
-            itemIndex,
-            status
-        ) => {
+const updateFoodStatus =
+async (
+    orderId,
+    itemIndex,
+    status
+) => {
 
-            try {
+    try {
 
-                await fetch(
+        const response =
+            await fetch(
 `${API_URL}/updateOrderStatus.php`,
-                    {
-                        method:
-                            "POST",
+                {
+                    method: "POST",
 
-                        headers:
-                        {
-                            "Content-Type":
-                                "application/json"
-                        },
+                    headers: {
+                        "Content-Type":
+                        "application/json"
+                    },
 
-                        body:
-                            JSON.stringify(
-                                {
-                                    orderId,
-                                    itemIndex,
-                                    status
-                                }
-                            )
-                    }
-                );
+                    body:
+                    JSON.stringify({
+                        orderId,
+                        itemIndex,
+                        status
+                    })
+                }
+            );
 
-                fetchOrders();
+        const data =
+            await response.json();
 
-            } catch (
-                error
-            ) {
+        if(data.success){
 
-                console.log(
-                    error
-                );
-            }
-        };
+            // instant refresh
+            await fetchOrders();
+
+        } else {
+
+            alert(
+                data.message ||
+                "Status update failed"
+            );
+        }
+
+    } catch(error){
+
+        console.log(error);
+
+        alert(
+            "Status update failed"
+        );
+    }
+};
 
     const getStatusColor =
-        (status) => {
+(status) => {
 
-            switch (
-                status
-            ) {
+    switch(status){
 
-                case "Pending":
+        case "Pending":
+            return "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30";
 
-                    return
-"bg-yellow-500/20 text-yellow-400 border-yellow-500/20";
+        case "Preparing":
+            return "bg-blue-500/20 text-blue-300 border border-blue-500/30";
 
-                case "Preparing":
+        case "Completed":
+            return "bg-green-500/20 text-green-300 border border-green-500/30";
 
-                    return
-"bg-blue-500/20 text-blue-400 border-blue-500/20";
+        case "Cancelled":
+            return "bg-red-500/20 text-red-300 border border-red-500/30";
 
-                case "Completed":
-
-                    return
-"bg-green-500/20 text-green-400 border-green-500/20";
-
-                case "Cancelled":
-
-                    return
-"bg-red-500/20 text-red-400 border-red-500/20";
-
-                default:
-
-                    return
-"bg-gray-500/20 text-gray-400 border-gray-500/20";
-            }
-        };
-
+        default:
+            return "bg-gray-500/20 text-gray-300 border border-gray-500/30";
+    }
+};
     const filteredOrders =
         useMemo(() => {
 

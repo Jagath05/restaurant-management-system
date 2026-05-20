@@ -175,27 +175,26 @@ export default function ManageReservations() {
         };
 
     const getStatusColor =
-        (status) => {
+(status) => {
 
-            switch(status){
+    switch(status){
 
-                case "Approved":
-                    return
-"bg-green-500/20 text-green-400 border-green-500/20";
+        case "Approved":
+            return "bg-green-500/20 text-green-300 border border-green-500/30 shadow-sm shadow-green-500/20";
 
-                case "Rejected":
-                    return
-"bg-red-500/20 text-red-400 border-red-500/20";
+        case "Rejected":
+            return "bg-red-500/20 text-red-300 border border-red-500/30 shadow-sm shadow-red-500/20";
 
-                case "Completed":
-                    return
-"bg-violet-500/20 text-violet-400 border-violet-500/20";
+        case "Completed":
+            return "bg-violet-500/20 text-violet-300 border border-violet-500/30 shadow-sm shadow-violet-500/20";
 
-                default:
-                    return
-"bg-yellow-500/20 text-yellow-400 border-yellow-500/20";
-            }
-        };
+        case "Pending":
+            return "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 shadow-sm shadow-yellow-500/20";
+
+        default:
+            return "bg-gray-500/20 text-gray-300 border border-gray-500/30";
+    }
+};
 
     const filteredReservations =
         useMemo(() => {

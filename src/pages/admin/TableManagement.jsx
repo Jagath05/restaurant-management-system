@@ -128,32 +128,27 @@ export default function TableManagement() {
             }
         };
 
-    const getColor =
-        (status) => {
+  const getColor =
+(status) => {
 
-            switch(status){
+    switch(status){
 
-                case "Available":
-                    return
-"bg-green-500/20 text-green-400 border-green-500/20";
+        case "Available":
+            return "bg-green-500/20 text-green-300 border border-green-500/30 shadow-sm shadow-green-500/20";
 
-                case "Reserved":
-                    return
-"bg-yellow-500/20 text-yellow-400 border-yellow-500/20";
+        case "Reserved":
+            return "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 shadow-sm shadow-yellow-500/20";
 
-                case "Occupied":
-                    return
-"bg-red-500/20 text-red-400 border-red-500/20";
+        case "Occupied":
+            return "bg-red-500/20 text-red-300 border border-red-500/30 shadow-sm shadow-red-500/20";
 
-                case "Maintenance":
-                    return
-"bg-gray-500/20 text-gray-400 border-gray-500/20";
+        case "Maintenance":
+            return "bg-gray-500/20 text-gray-300 border border-gray-500/30";
 
-                default:
-                    return
-"bg-white/10 text-white";
-            }
-        };
+        default:
+            return "bg-white/10 text-white border border-white/10";
+    }
+};
 
     const filteredTables =
         useMemo(() => {

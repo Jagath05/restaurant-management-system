@@ -4,7 +4,12 @@ import {
     motion
 } from "framer-motion";
 
+import {
+    useNavigate
+} from "react-router-dom";
+
 const offers = [
+
     {
         title:
             "20% OFF Dinner",
@@ -13,7 +18,10 @@ const offers = [
             "Enjoy premium dinner with exclusive discounts.",
 
         emoji:
-            "🍽️"
+            "🍽️",
+
+        path:
+            "/dinner"
     },
 
     {
@@ -24,7 +32,10 @@ const offers = [
             "Order above ₹499 and get a free refreshing drink.",
 
         emoji:
-            "🥤"
+            "🥤",
+
+        path:
+            "/drinks"
     },
 
     {
@@ -35,12 +46,17 @@ const offers = [
             "Exclusive dishes available only on weekends.",
 
         emoji:
-            "🔥"
+            "🔥",
+
+        path:
+            "/lunch"
     }
 ];
 
 export default function
 SpecialOffers() {
+    const navigate =
+    useNavigate();
 
     return (
 
@@ -159,11 +175,24 @@ SpecialOffers() {
 
                                         </p>
 
-                                        <button className="mt-8 bg-violet-600 hover:bg-violet-700 px-6 py-3 rounded-2xl text-white font-semibold hover:scale-105 duration-500">
+                                       <button
+    onClick={() => {
 
-                                            Grab Offer
+        navigate(
+            offer.path
+        );
 
-                                        </button>
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    }}
+    className="mt-8 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 px-6 py-3 rounded-2xl text-white font-semibold hover:scale-105 duration-500 shadow-[0_0_25px_rgba(124,58,237,0.25)]"
+>
+
+    Grab Offer →
+
+</button>
 
                                     </div>
 

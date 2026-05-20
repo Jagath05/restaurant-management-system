@@ -36,21 +36,9 @@ export default function TabletSetup() {
 
     useEffect(() => {
 
-        const assignedTable =
-            localStorage.getItem(
-                "tableNumber"
-            );
+    fetchTables();
 
-        if(
-            assignedTable
-        ){
-
-            navigate("/");
-        }
-
-        fetchTables();
-
-    }, []);
+}, []);
 
     const fetchTables =
         async () => {

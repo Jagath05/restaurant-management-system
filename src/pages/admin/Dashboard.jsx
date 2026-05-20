@@ -177,38 +177,26 @@ export default function Dashboard() {
     ];
 
     const getStatusColor =
-        (status) => {
+(status) => {
 
-            switch(
-                status
-            ){
+    switch(status){
 
-                case "Pending":
+        case "Pending":
+            return "bg-yellow-500/20 text-yellow-300 border border-yellow-500/20";
 
-                    return
-"bg-yellow-500/20 text-yellow-400";
+        case "Preparing":
+            return "bg-blue-500/20 text-blue-300 border border-blue-500/20";
 
-                case "Preparing":
+        case "Completed":
+            return "bg-green-500/20 text-green-300 border border-green-500/20";
 
-                    return
-"bg-blue-500/20 text-blue-400";
+        case "Cancelled":
+            return "bg-red-500/20 text-red-300 border border-red-500/20";
 
-                case "Completed":
-
-                    return
-"bg-green-500/20 text-green-400";
-
-                case "Cancelled":
-
-                    return
-"bg-red-500/20 text-red-400";
-
-                default:
-
-                    return
-"bg-gray-500/20 text-gray-400";
-            }
-        };
+        default:
+            return "bg-gray-500/20 text-gray-300 border border-gray-500/20";
+    }
+};
 
     return (
 
@@ -319,27 +307,105 @@ export default function Dashboard() {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="grid md:grid-cols-3 gap-5">
+<div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 
-                    <button className="bg-violet-600 hover:bg-violet-700 rounded-3xl p-5 text-white font-semibold duration-300">
+    {/* Manage Orders */}
+    <button
+        onClick={() =>
+            window.location.href =
+            "/manage-orders"
+        }
+        className="group bg-gradient-to-r from-violet-600 to-purple-700 hover:scale-[1.03] rounded-[30px] p-6 text-white font-semibold duration-300 shadow-[0_0_30px_rgba(124,58,237,0.25)]"
+    >
 
-                        Manage Orders
+        <div className="flex flex-col items-center text-center">
 
-                    </button>
+            <ShoppingBag
+                size={35}
+                className="mb-4 group-hover:scale-110 duration-300"
+            />
 
-                    <button className="bg-[#252035] hover:bg-[#2d2740] rounded-3xl p-5 text-white font-semibold duration-300">
+            <h3 className="text-2xl font-bold">
 
-                        Manage Menu
+                Manage Orders
 
-                    </button>
+            </h3>
 
-                    <button className="bg-[#252035] hover:bg-[#2d2740] rounded-3xl p-5 text-white font-semibold duration-300">
+            <p className="text-white/70 mt-2">
 
-                        Manage Tables
+                View and manage customer orders
 
-                    </button>
+            </p>
 
-                </div>
+        </div>
+
+    </button>
+
+    {/* Manage Menu */}
+    <button
+        onClick={() =>
+            window.location.href =
+            "/manage-menu"
+        }
+        className="group bg-[#252035] hover:bg-[#2d2740] hover:scale-[1.03] border border-white/10 rounded-[30px] p-6 text-white font-semibold duration-300"
+    >
+
+        <div className="flex flex-col items-center text-center">
+
+            <UtensilsCrossed
+                size={35}
+                className="text-violet-400 mb-4 group-hover:scale-110 duration-300"
+            />
+
+            <h3 className="text-2xl font-bold">
+
+                Manage Menu
+
+            </h3>
+
+            <p className="text-gray-400 mt-2">
+
+                Add and update foods
+
+            </p>
+
+        </div>
+
+    </button>
+
+    {/* Manage Tables */}
+    <button
+        onClick={() =>
+            window.location.href =
+            "/table-management"
+        }
+        className="group bg-[#252035] hover:bg-[#2d2740] hover:scale-[1.03] border border-white/10 rounded-[30px] p-6 text-white font-semibold duration-300"
+    >
+
+        <div className="flex flex-col items-center text-center">
+
+            <TableProperties
+                size={35}
+                className="text-violet-400 mb-4 group-hover:scale-110 duration-300"
+            />
+
+            <h3 className="text-2xl font-bold">
+
+                Manage Tables
+
+            </h3>
+
+            <p className="text-gray-400 mt-2">
+
+                Table setup & management
+
+            </p>
+
+        </div>
+
+    </button>
+
+</div>
 
                 {/* Orders Table */}
                 <div className="bg-white/5 border border-white/10 rounded-[35px] backdrop-blur-xl overflow-hidden">

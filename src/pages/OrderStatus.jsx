@@ -1,6 +1,5 @@
 import React, {
     useEffect,
-    useMemo,
     useState
 } from "react";
 
@@ -11,7 +10,9 @@ import {
 import {
     Clock3,
     ChefHat,
-    CircleCheckBig
+    CircleCheckBig,
+    Sparkles,
+    ShoppingBag
 } from "lucide-react";
 
 import Navbar
@@ -19,6 +20,9 @@ from "../components/Navbar";
 
 const API_BASE =
 "https://restaurant-jagath.infinityfreeapp.com/restaurant-api";
+
+const FALLBACK_IMAGE =
+"https://images.unsplash.com/photo-1544025162-d76694265947?w=1200&q=80";
 
 export default function OrderStatus() {
 
@@ -44,7 +48,7 @@ export default function OrderStatus() {
         const interval =
             setInterval(
                 fetchOrders,
-                3000
+                2000
             );
 
         return () =>
@@ -57,9 +61,7 @@ export default function OrderStatus() {
     const fetchOrders =
         async () => {
 
-            if(
-                !tableNumber
-            ){
+            if(!tableNumber){
 
                 setLoading(
                     false
@@ -98,30 +100,53 @@ export default function OrderStatus() {
             }
         };
 
+    /* FIXED STATUS COLORS */
     const getStatusColor =
         (status)=>{
 
             switch(status){
 
                 case "Pending":
+                    return "text-yellow-300";
+
+                case "Preparing":
+                    return "text-orange-400";
+
+                case "Completed":
+                    return "text-green-400";
+
+                case "Cancelled":
+                    return "text-red-400";
+
+                default:
+                    return "text-white";
+            }
+        };
+
+    const getStatusBg =
+        (status)=>{
+
+            switch(status){
+
+                case "Pending":
                     return
-"text-yellow-400";
+"bg-yellow-500/10 border-yellow-500/20";
 
                 case "Preparing":
                     return
-"text-orange-400";
+"bg-orange-500/10 border-orange-500/20";
 
                 case "Completed":
                     return
-"text-green-400";
+"bg-green-500/10 border-green-500/20";
 
                 case "Cancelled":
                     return
-"text-red-400";
+"bg-red-500/10 border-red-500/20";
 
                 default:
                     return
-"text-white";
+"bg-white/5 border-white/10";
             }
         };
 
@@ -143,7 +168,8 @@ export default function OrderStatus() {
                     return 0;
             }
         };
-            return (
+
+    return (
 
         <>
 
@@ -151,36 +177,73 @@ export default function OrderStatus() {
 
             <section className="min-h-screen bg-[#181325] px-5 py-28 relative overflow-hidden">
 
-                {/* Glow Background */}
+                {/* Glow */}
                 <div className="absolute top-[-150px] left-[-150px] w-[350px] h-[350px] bg-violet-600/20 blur-[120px] rounded-full" />
 
                 <div className="absolute bottom-[-150px] right-[-150px] w-[350px] h-[350px] bg-fuchsia-500/20 blur-[120px] rounded-full" />
 
-                <div className="max-w-6xl mx-auto relative z-10">
+                <div className="max-w-7xl mx-auto relative z-10">
 
-                    {/* Header */}
-                    <div className="text-center">
+                    {/* Hero */}
+                    <motion.div
+                        initial={{
+                            opacity: 0,
+                            y: 40
+                        }}
+                        animate={{
+                            opacity: 1,
+                            y: 0
+                        }}
+                        transition={{
+                            duration: 0.5
+                        }}
+                        className="text-center"
+                    >
 
-                        <h1 className="text-white text-4xl md:text-6xl font-bold">
+                        <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 mb-8">
 
-                            🍽️ Order Tracking
+                            <Sparkles
+                                size={18}
+                            />
+
+                            Live Order Tracking
+
+                        </div>
+
+                        <h1 className="text-white text-5xl md:text-7xl font-bold">
+
+                            Track Your
+
+                            <span className="bg-gradient-to-r from-violet-400 to-fuchsia-500 bg-clip-text text-transparent">
+
+                                {" "}
+                                Order
+
+                            </span>
 
                         </h1>
 
-                        <p className="text-violet-400 text-xl md:text-2xl mt-4">
+                        <p className="text-gray-400 text-lg md:text-2xl mt-6">
 
-                            Table {
-                                tableNumber
-                            }
+                            Table
+                            {" "}
+                            <span className="text-violet-400 font-bold">
+
+                                {
+                                    tableNumber
+                                }
+
+                            </span>
 
                         </p>
 
-                    </div>
+                    </motion.div>
 
+                    {/* Loading */}
                     {
-                        loading ? (
+                        loading && (
 
-                            <div className="grid md:grid-cols-2 gap-8 mt-16">
+                            <div className="grid gap-8 mt-16">
 
                                 {
                                     [...Array(3)].map(
@@ -188,39 +251,56 @@ export default function OrderStatus() {
 
                                             <div
                                                 key={i}
-                                                className="h-[350px] rounded-[35px] bg-white/5 animate-pulse"
+                                                className="h-[350px] rounded-[40px] bg-white/5 animate-pulse"
                                             />
                                         )
                                     )
                                 }
 
                             </div>
-
                         )
+                    }
+                                        {
+                        !loading &&
+                        orders.length === 0 ? (
 
-                        : orders.length === 0 ? (
+                            <motion.div
+                                initial={{
+                                    opacity: 0
+                                }}
+                                animate={{
+                                    opacity: 1
+                                }}
+                                className="text-center mt-24 bg-white/5 border border-white/10 rounded-[45px] p-12 backdrop-blur-2xl"
+                            >
 
-                            <div className="text-center mt-24">
+                                <div className="w-32 h-32 rounded-full bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mx-auto mb-8">
 
-                                <h2 className="text-white text-4xl font-bold">
+                                    <ShoppingBag
+                                        size={60}
+                                        className="text-violet-400"
+                                    />
+
+                                </div>
+
+                                <h2 className="text-white text-5xl font-bold">
 
                                     No Active Orders
 
                                 </h2>
 
-                                <p className="text-gray-400 mt-4 text-lg">
+                                <p className="text-gray-400 mt-5 text-lg">
 
-                                    Order food to track status
+                                    Order delicious meals to track
+                                    your food in real-time.
 
                                 </p>
 
-                            </div>
+                            </motion.div>
 
-                        )
+                        ) : (
 
-                        : (
-
-                            <div className="space-y-8 mt-16">
+                            <div className="space-y-10 mt-20">
 
                                 {
                                     orders.map(
@@ -230,7 +310,9 @@ export default function OrderStatus() {
                                         ) => (
 
                                             <motion.div
-                                                key={order.id}
+                                                key={
+                                                    order.id
+                                                }
                                                 initial={{
                                                     opacity: 0,
                                                     y: 50
@@ -241,18 +323,28 @@ export default function OrderStatus() {
                                                 }}
                                                 transition={{
                                                     delay:
-                                                        orderIndex *
-                                                        0.05
+                                                    orderIndex *
+                                                    0.08
                                                 }}
-                                                className="bg-white/5 border border-white/10 rounded-[35px] p-6 md:p-8 shadow-2xl backdrop-blur-2xl"
+                                                className="bg-white/[0.04] border border-white/10 rounded-[40px] p-7 md:p-9 backdrop-blur-3xl shadow-[0_0_50px_rgba(124,58,237,0.08)]"
                                             >
 
                                                 {/* Top */}
-                                                <div className="flex flex-col lg:flex-row justify-between gap-6">
+                                                <div className="flex flex-col lg:flex-row justify-between gap-8">
 
                                                     <div>
 
-                                                        <h2 className="text-white text-3xl font-bold">
+                                                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 mb-5">
+
+                                                            <Sparkles
+                                                                size={16}
+                                                            />
+
+                                                            Live Tracking
+
+                                                        </div>
+
+                                                        <h2 className="text-white text-3xl md:text-4xl font-bold">
 
                                                             Order #
                                                             {
@@ -270,7 +362,7 @@ export default function OrderStatus() {
 
                                                         </p>
 
-                                                        <p className="text-violet-400 mt-3 font-semibold">
+                                                        <p className="text-violet-400 mt-4 font-semibold text-lg">
 
                                                             Payment:
                                                             {" "}
@@ -282,17 +374,18 @@ export default function OrderStatus() {
 
                                                     </div>
 
-                                                    <div className="text-right">
+                                                    <div className="text-left lg:text-right">
 
-                                                        <h2 className="text-violet-400 text-4xl font-bold">
+                                                        <h2 className="text-violet-400 text-4xl md:text-5xl font-bold">
 
-                                                            ₹{
+                                                            ₹
+                                                            {
                                                                 order.total
                                                             }
 
                                                         </h2>
 
-                                                        <p className="text-gray-400 mt-2">
+                                                        <p className="text-gray-400 mt-3 text-lg">
 
                                                             {
                                                                 order.payment_status
@@ -305,129 +398,162 @@ export default function OrderStatus() {
 
                                                 </div>
 
-                                                {/* Food List */}
-                                                <div className="space-y-5 mt-8">
+                                                {/* Items */}
+                                                <div className="space-y-5 mt-10">
 
                                                     {
                                                         order.items.map(
                                                             (
                                                                 item,
                                                                 index
-                                                            ) => (
+                                                            ) => {
 
-                                                                <div
-                                                                    key={index}
-                                                                    className="bg-[#231b38] rounded-[30px] border border-white/10 p-5"
-                                                                >
+                                                                const image =
+item.image
+? `https://restaurant-jagath.infinityfreeapp.com/restaurant-api/uploads/images/${item.image}`
+: FALLBACK_IMAGE;
 
-                                                                    <div className="flex flex-col md:flex-row justify-between gap-5">
+                                                                return (
 
-                                                                        <div>
+                                                                    <div
+                                                                        key={
+                                                                            index
+                                                                        }
+                                                                        className="bg-[#231b38] border border-white/10 rounded-[35px] p-5"
+                                                                    >
 
-                                                                            <h3 className="text-white text-2xl font-bold">
+                                                                        <div className="flex flex-col md:flex-row justify-between gap-6">
 
-                                                                                {
-                                                                                    item.food_name
-                                                                                }
+                                                                            {/* Left */}
+                                                                            <div className="flex gap-5">
 
-                                                                            </h3>
+                                                                                {/* Small Food Image */}
+                                                                                <img
+                                                                                    src={
+                                                                                        image
+                                                                                    }
+                                                                                    onError={(e)=>{
 
-                                                                            <p className="text-gray-400 mt-2">
-
-                                                                                Qty:
-                                                                                {" "}
-                                                                                {
-                                                                                    item.quantity
-                                                                                }
-
-                                                                            </p>
-
-                                                                        </div>
-
-                                                                        <div className="text-right">
-
-                                                                            <h3 className="text-violet-400 text-2xl font-bold">
-
-                                                                                ₹{
-                                                                                    item.price *
-                                                                                    item.quantity
-                                                                                }
-
-                                                                            </h3>
-
-                                                                            <p
-                                                                                className={`font-bold text-lg mt-3 ${getStatusColor(item.status)}`}
-                                                                            >
-
-                                                                                {
-                                                                                    item.status
-                                                                                }
-
-                                                                            </p>
-
-                                                                        </div>
-
-                                                                    </div>
-
-                                                                    {/* Progress */}
-                                                                    <div className="mt-5">
-
-                                                                        <div className="flex justify-between text-sm text-gray-400 mb-3">
-
-                                                                            <div className="flex items-center gap-2">
-
-                                                                                <Clock3
-                                                                                    size={16}
+                                                                                        e.target.src =
+                                                                                        FALLBACK_IMAGE;
+                                                                                    }}
+                                                                                    alt=""
+                                                                                    className="w-24 h-24 rounded-[25px] object-cover"
                                                                                 />
 
-                                                                                Pending
+                                                                                <div>
+
+                                                                                    <h3 className="text-white text-2xl font-bold">
+
+                                                                                        {
+                                                                                            item.food_name
+                                                                                        }
+
+                                                                                    </h3>
+
+                                                                                    <p className="text-gray-400 mt-2">
+
+                                                                                        Qty:
+                                                                                        {" "}
+                                                                                        {
+                                                                                            item.quantity
+                                                                                        }
+
+                                                                                    </p>
+
+                                                                                    {/* FIXED STATUS */}
+                                                                                    <div className={`inline-flex mt-4 px-4 py-2 rounded-full border font-semibold ${getStatusColor(item.status)} ${getStatusBg(item.status)}`}>
+
+                                                                                        {
+                                                                                            item.status
+                                                                                        }
+
+                                                                                    </div>
+
+                                                                                </div>
 
                                                                             </div>
 
-                                                                            <div className="flex items-center gap-2">
+                                                                            {/* Right */}
+                                                                            <div className="text-left md:text-right">
 
-                                                                                <ChefHat
-                                                                                    size={16}
-                                                                                />
+                                                                                <h3 className="text-violet-400 text-3xl font-bold">
 
-                                                                                Preparing
+                                                                                    ₹
+                                                                                    {
+                                                                                        item.price *
+                                                                                        item.quantity
+                                                                                    }
 
-                                                                            </div>
-
-                                                                            <div className="flex items-center gap-2">
-
-                                                                                <CircleCheckBig
-                                                                                    size={16}
-                                                                                />
-
-                                                                                Completed
+                                                                                </h3>
 
                                                                             </div>
 
                                                                         </div>
+                                                                                                                                                {/* Timeline */}
+                                                                        <div className="mt-7">
 
-                                                                        <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
+                                                                            <div className="flex justify-between text-sm md:text-base text-gray-300 mb-4">
 
-                                                                            <motion.div
-                                                                                initial={{
-                                                                                    width: 0
-                                                                                }}
-                                                                                animate={{
-                                                                                    width:
+                                                                                <div className="flex items-center gap-2">
+
+                                                                                    <Clock3
+                                                                                        size={18}
+                                                                                        className="text-yellow-400"
+                                                                                    />
+
+                                                                                    Pending
+
+                                                                                </div>
+
+                                                                                <div className="flex items-center gap-2">
+
+                                                                                    <ChefHat
+                                                                                        size={18}
+                                                                                        className="text-orange-400"
+                                                                                    />
+
+                                                                                    Preparing
+
+                                                                                </div>
+
+                                                                                <div className="flex items-center gap-2">
+
+                                                                                    <CircleCheckBig
+                                                                                        size={18}
+                                                                                        className="text-green-400"
+                                                                                    />
+
+                                                                                    Completed
+
+                                                                                </div>
+
+                                                                            </div>
+
+                                                                            {/* Progress */}
+                                                                            <div className="relative w-full bg-white/10 rounded-full h-4 overflow-hidden">
+
+                                                                                <motion.div
+                                                                                    initial={{
+                                                                                        width: 0
+                                                                                    }}
+                                                                                    animate={{
+                                                                                        width:
 `${getProgress(item.status)}%`
-                                                                                }}
-                                                                                transition={{
-                                                                                    duration: 0.5
-                                                                                }}
-                                                                                className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-full"
-                                                                            />
+                                                                                    }}
+                                                                                    transition={{
+                                                                                        duration: 0.8
+                                                                                    }}
+                                                                                    className="h-full bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 rounded-full"
+                                                                                />
+
+                                                                            </div>
 
                                                                         </div>
 
                                                                     </div>
-
-                                                                </div>
-                                                            )
+                                                                );
+                                                            }
                                                         )
                                                     }
 

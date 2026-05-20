@@ -7,7 +7,9 @@ import {
 } from "framer-motion";
 
 import {
-    ShoppingCart
+    ShoppingCart,
+    Star,
+    Flame
 } from "lucide-react";
 
 import {
@@ -28,7 +30,8 @@ export default function FoodCard({
 
     const {
         addToCart
-    } = cartContext;
+    } =
+    cartContext;
 
     const handleAdd =
         () => {
@@ -41,16 +44,16 @@ export default function FoodCard({
     const imageUrl =
         item.image
 
-            ? `https://restaurant-jagath.infinityfreeapp.com/restaurant-api/uploads/images/${item.image}`
+        ? `https://restaurant-jagath.infinityfreeapp.com/restaurant-api/uploads/images/${item.image}`
 
-            : FALLBACK_IMAGE;
+        : FALLBACK_IMAGE;
 
     return (
 
         <motion.div
             initial={{
                 opacity: 0,
-                y: 50
+                y: 60
             }}
             whileInView={{
                 opacity: 1,
@@ -60,26 +63,42 @@ export default function FoodCard({
                 once: true
             }}
             transition={{
-                duration: 0.4
+                duration: 0.45
             }}
             whileHover={{
-                y: -10
+                y: -12
             }}
-            className="group relative overflow-hidden rounded-[35px] border border-white/10 bg-white/5 backdrop-blur-xl hover:border-violet-500/30 duration-500 shadow-[0_0_40px_rgba(124,58,237,0.08)]"
+            className="group relative overflow-hidden rounded-[40px] border border-white/10 bg-white/[0.04] backdrop-blur-2xl hover:border-violet-500/30 duration-700 shadow-[0_0_60px_rgba(124,58,237,0.08)]"
         >
 
-            {/* Hover Glow */}
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-br from-violet-500/10 to-pink-500/10 duration-500" />
+            {/* Glow */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-br from-violet-500/10 via-fuchsia-500/10 to-pink-500/10 duration-700" />
 
-            {/* Food Type */}
-            <div className={`absolute top-5 right-5 z-20 px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-xl border
+            {/* Premium Badge */}
+            <div className="absolute top-5 left-5 z-20 flex items-center gap-2 bg-black/40 backdrop-blur-xl border border-white/10 rounded-full px-4 py-2">
+
+                <Flame
+                    size={16}
+                    className="text-orange-400"
+                />
+
+                <span className="text-white text-sm font-medium">
+
+                    Popular
+
+                </span>
+
+            </div>
+
+            {/* Veg / Non Veg */}
+            <div className={`absolute top-5 right-5 z-20 px-5 py-2 rounded-full text-sm font-semibold backdrop-blur-xl border
             ${
                 item.food_type ===
                 "Veg"
 
-                    ? "bg-green-500/15 text-green-400 border-green-500/20"
+                ? "bg-green-500/15 text-green-400 border-green-500/20"
 
-                    : "bg-red-500/15 text-red-400 border-red-500/20"
+                : "bg-red-500/15 text-red-400 border-red-500/20"
             }`}>
 
                 {
@@ -89,7 +108,7 @@ export default function FoodCard({
             </div>
 
             {/* Image */}
-            <div className="relative overflow-hidden h-[270px]">
+            <div className="relative overflow-hidden h-[340px]">
 
                 <img
                     src={
@@ -98,37 +117,71 @@ export default function FoodCard({
                     alt={
                         item.food_name
                     }
-                    onError={
-                        (
-                            e
-                        ) => {
+                    onError={(e)=>{
 
-                            e.target.src =
-                                FALLBACK_IMAGE;
-                        }
-                    }
-                    className="w-full h-full object-cover group-hover:scale-110 duration-[3000ms]"
+                        e.target.src =
+                        FALLBACK_IMAGE;
+                    }}
+                    className="w-full h-full object-cover group-hover:scale-110 duration-[3500ms]"
                 />
 
                 {/* Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+
+                {/* Floating Price */}
+                <div className="absolute bottom-5 right-5 bg-black/40 backdrop-blur-2xl border border-white/10 rounded-[20px] px-5 py-3">
+
+                    <p className="text-gray-400 text-xs">
+
+                        Starting at
+
+                    </p>
+
+                    <h3 className="text-violet-300 text-2xl font-bold">
+
+                        ₹{
+                            item.price
+                        }
+
+                    </h3>
+
+                </div>
 
             </div>
+                        {/* Content */}
+            <div className="relative z-10 p-8">
 
-            {/* Content */}
-            <div className="relative z-10 p-7">
+                {/* Section Badge */}
+                <div className="flex items-center justify-between">
 
-                {/* Category */}
-                <div className="inline-flex bg-white/5 border border-white/10 rounded-full px-4 py-2 text-sm text-violet-300 mb-5">
+                    <div className="inline-flex bg-white/5 border border-white/10 rounded-full px-4 py-2 text-sm text-violet-300">
 
-                    {
-                        item.section
-                    }
+                        {
+                            item.section
+                        }
+
+                    </div>
+
+                    {/* Rating */}
+                    <div className="flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/20 px-3 py-2 rounded-full">
+
+                        <Star
+                            size={16}
+                            className="text-yellow-400 fill-yellow-400"
+                        />
+
+                        <span className="text-yellow-300 text-sm font-semibold">
+
+                            4.9
+
+                        </span>
+
+                    </div>
 
                 </div>
 
                 {/* Food Name */}
-                <h2 className="text-white text-[28px] font-bold capitalize leading-tight">
+                <h2 className="text-white text-[34px] font-bold capitalize mt-6 leading-tight">
 
                     {
                         item.food_name
@@ -136,41 +189,39 @@ export default function FoodCard({
 
                 </h2>
 
-                <p className="text-gray-400 mt-2">
+                {/* Description */}
+                <p className="text-gray-400 mt-4 text-[16px] leading-8">
 
-                    Delicious premium
-                    quality dish freshly
-                    prepared for you.
+                    Freshly prepared with premium ingredients
+                    and crafted by expert chefs to deliver
+                    unforgettable taste and luxury dining.
 
                 </p>
 
                 {/* Bottom */}
-                <div className="flex items-center justify-between mt-8">
+                <div className="flex items-center justify-between mt-10">
 
-                    {/* Price */}
+                    {/* Info */}
                     <div>
 
                         <p className="text-gray-500 text-sm">
 
-                            Price
+                            Premium Quality
 
                         </p>
 
-                        <h3 className="text-violet-400 text-[30px] font-bold">
+                        <h3 className="text-white text-xl font-semibold mt-2">
 
-                            ₹
-                            {
-                                item.price
-                            }
+                            Chef Recommended
 
                         </h3>
 
                     </div>
 
-                    {/* Button */}
+                    {/* Add Button */}
                     <motion.button
                         whileTap={{
-                            scale: 0.95
+                            scale: 0.94
                         }}
                         whileHover={{
                             scale: 1.05
@@ -178,21 +229,28 @@ export default function FoodCard({
                         onClick={
                             handleAdd
                         }
-                        className="flex items-center gap-3 bg-gradient-to-r from-violet-600 to-purple-700 hover:from-violet-500 hover:to-purple-600 px-6 py-4 rounded-2xl text-white font-semibold shadow-[0_0_30px_rgba(124,58,237,0.35)] duration-500"
+                        className="group/add relative overflow-hidden flex items-center gap-3 bg-gradient-to-r from-violet-600 via-purple-700 to-fuchsia-700 hover:from-violet-500 hover:to-fuchsia-600 px-7 py-5 rounded-[24px] text-white font-semibold shadow-[0_0_35px_rgba(124,58,237,0.35)] duration-500"
                     >
 
+                        {/* Hover Glow */}
+                        <div className="absolute inset-0 opacity-0 group-hover/add:opacity-100 bg-white/10 duration-500" />
+
                         <ShoppingCart
-                            size={20}
+                            size={22}
+                            className="relative z-10"
                         />
 
-                        Add
+                        <span className="relative z-10">
+
+                            Add To Cart
+
+                        </span>
 
                     </motion.button>
 
                 </div>
 
             </div>
-
-        </motion.div>
+                    </motion.div>
     );
 }

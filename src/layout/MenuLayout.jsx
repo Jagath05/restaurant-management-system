@@ -1,12 +1,19 @@
 import React, {
     useEffect,
     useMemo,
-    useState
+    useState,
+    useContext
 } from "react";
 
 import {
     motion
 } from "framer-motion";
+import {
+    Search
+} from "lucide-react";
+import {
+    CartContext
+} from "../context/CartContext";
 
 import FoodCard from "../components/FoodCard";
 import Cart from "../components/Cart";
@@ -16,9 +23,6 @@ import {
     useNavigate
 } from "react-router-dom";
 
-import {
-    Search
-} from "lucide-react";
 
 export default function MenuLayout({
     meal
@@ -26,6 +30,12 @@ export default function MenuLayout({
 
     const navigate =
         useNavigate();
+        
+    const {
+    showCart
+            } = useContext(
+    CartContext
+            );
 
     const [foods,
         setFoods] =
@@ -194,8 +204,17 @@ export default function MenuLayout({
 
             <Navbar />
 
-            <section className="min-h-screen bg-[#181325] px-5 md:px-10 pt-36 pb-20">
+<section className="min-h-screen bg-[#181325] px-5 md:px-10 pt-36 pb-20">
 
+     <div className="flex flex-col xl:flex-row gap-8 relative">
+        <div
+    className={`transition-all duration-500
+    ${
+        showCart
+        ? "xl:w-[68%]"
+        : "w-full"
+    }`}
+>
                 {/* Heading */}
                 <motion.div
                     initial={{
@@ -591,9 +610,36 @@ export default function MenuLayout({
                     )
                 }
 
-            </section>
+           </div>
 
-            <Cart />
+        {/* Desktop Fixed Cart */}
+{
+    showCart && (
+
+        <div className="hidden xl:block xl:w-[32%] sticky top-28 h-[calc(100vh-140px)]">
+
+            <div className="h-full overflow-hidden rounded-[40px] border border-white/10 bg-[#140f22]/95 backdrop-blur-3xl shadow-[0_0_60px_rgba(124,58,237,0.12)]">
+
+                <Cart
+                    fixedMode={true}
+                />
+
+            </div>
+
+        </div>
+    )
+}
+
+{/* Mobile Drawer */}
+<div className="xl:hidden">
+
+    <Cart />
+
+</div>
+
+</div>
+
+</section>
 
         </>
     );

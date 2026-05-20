@@ -18,12 +18,13 @@ export default function
 FloatingCart() {
 
     const {
-        cart,
-        setShowCart
-    } =
-    useContext(
-        CartContext
-    );
+    cart,
+    showCart,
+    setShowCart
+} =
+useContext(
+    CartContext
+);
 
     const totalItems =
         cart.reduce(
@@ -38,9 +39,14 @@ FloatingCart() {
             0
         );
 
-    return (
+    if(showCart){
 
-        <motion.div
+    return null;
+}
+
+return (
+
+    <motion.div
             initial={{
                 opacity: 0,
                 scale: 0.8
@@ -66,10 +72,9 @@ FloatingCart() {
                 whileTap={{
                     scale: 0.95
                 }}
-                onClick={() =>
-                    setShowCart(
-                        true
-                    )
+                onClick={() => setShowCart(
+                    prev => !prev
+                )
                 }
                 className="relative flex items-center gap-3 bg-gradient-to-r from-violet-600 to-purple-700 hover:from-violet-500 hover:to-purple-600 px-5 md:px-6 py-4 rounded-full border border-white/10 backdrop-blur-xl shadow-[0_0_35px_rgba(124,58,237,0.35)] duration-300"
             >

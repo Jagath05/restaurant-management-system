@@ -13,7 +13,9 @@ import {
     X,
     ShoppingBag,
     Minus,
-    Plus
+    Plus,
+    Crown,
+    Sparkles
 } from "lucide-react";
 
 import {
@@ -23,7 +25,9 @@ import {
 const FALLBACK_IMAGE =
 "https://images.unsplash.com/photo-1544025162-d76694265947?w=1200&q=80";
 
-export default function Cart() {
+export default function Cart({
+    fixedMode = false
+}) {
 
     const {
         cart,
@@ -52,8 +56,7 @@ export default function Cart() {
         async () => {
 
             if (
-                cart.length ===
-                0
+                cart.length === 0
             ) {
 
                 alert(
@@ -90,36 +93,33 @@ export default function Cart() {
 "https://restaurant-jagath.infinityfreeapp.com/restaurant-api/orders/placeOrder.php",
                         {
                             method:
-                                "POST",
+                            "POST",
 
-                            headers:
-                            {
+                            headers: {
                                 "Content-Type":
-                                    "application/json"
+                                "application/json"
                             },
 
                             body:
-                                JSON.stringify(
-                                    {
-                                        customer_name:
-                                            "Guest",
+                            JSON.stringify({
+                                customer_name:
+                                "Guest",
 
-                                        table_number:
-                                            tableNumber,
+                                table_number:
+                                tableNumber,
 
-                                        items:
-                                            cart,
+                                items:
+                                cart,
 
-                                        subtotal,
+                                subtotal,
 
-                                        tax,
+                                tax,
 
-                                        total,
+                                total,
 
-                                        payment_method:
-                                            payment
-                                    }
-                                )
+                                payment_method:
+                                payment
+                            })
                         }
                     );
 
@@ -136,9 +136,10 @@ export default function Cart() {
                     );
 
                     alert(
-`Order Placed Successfully 🎉
+`🎉 Order Placed Successfully
 
-Order ID: #${data.order_id}`
+Order ID:
+#${data.order_id}`
                     );
 
                     clearCart();
@@ -154,9 +155,7 @@ Order ID: #${data.order_id}`
                     );
                 }
 
-            } catch (
-                error
-            ) {
+            } catch(error){
 
                 console.log(
                     error
@@ -184,110 +183,210 @@ Order ID: #${data.order_id}`
                     <>
 
                         {/* Overlay */}
-                        <motion.div
-                            initial={{
-                                opacity: 0
-                            }}
-                            animate={{
-                                opacity: 1
-                            }}
-                            exit={{
-                                opacity: 0
-                            }}
-                            onClick={() =>
-                                setShowCart(
-                                    false
-                                )
-                            }
-                            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998]"
-                        />
+                        {
+    !fixedMode && (
 
-                        {/* Cart Drawer */}
+        <motion.div
+            initial={{
+                opacity: 0
+            }}
+            animate={{
+                opacity: 1
+            }}
+            exit={{
+                opacity: 0
+            }}
+            onClick={() =>
+                setShowCart(
+                    false
+                )
+            }
+            className="fixed inset-0 bg-black/60 backdrop-blur-md z-[9998]"
+        />
+    )
+}
+
+                        {/* Drawer */}
                         <motion.div
-                            initial={{
-                                x: "100%"
-                            }}
-                            animate={{
-                                x: 0
-                            }}
-                            exit={{
-                                x: "100%"
-                            }}
-                            transition={{
-                                type: "spring",
-                                damping: 22
-                            }}
-                            className="fixed top-0 right-0 h-screen w-full sm:w-[450px] bg-[#181325]/95 backdrop-blur-2xl border-l border-white/10 z-[9999] shadow-[0_0_60px_rgba(124,58,237,0.15)] flex flex-col"
-                        >
+    initial={
+        fixedMode
+        ? false
+        : {
+            x: "100%"
+        }
+    }
+    animate={
+        fixedMode
+        ? {}
+        : {
+            x: 0
+        }
+    }
+    exit={
+        fixedMode
+        ? {}
+        : {
+            x: "100%"
+        }
+    }
+    transition={{
+        type:
+        "spring",
+        damping: 24
+    }}
+    className={`
+
+        ${
+            fixedMode
+
+            ? "relative h-full w-full rounded-[40px]"
+
+            : "fixed top-0 right-0 h-[100dvh] w-full sm:w-[650px] xl:w-[720px] z-[9999]"
+        }
+
+        bg-[#140f22]/95
+        backdrop-blur-3xl
+        border-l border-white/10
+        shadow-[0_0_80px_rgba(124,58,237,0.15)]
+        flex flex-col
+        overflow-hidden
+    `}
+>
+                            {/* Glow */}
+                            <div className="absolute top-[-100px] right-[-100px] w-[250px] h-[250px] bg-violet-600/20 blur-[120px] rounded-full" />
 
                             {/* Header */}
-                            <div className="p-6 border-b border-white/10">
+                            <div className="relative z-10 p-7 border-b border-white/10 bg-white/[0.02]">
 
                                 <div className="flex justify-between items-center">
 
                                     <div>
 
-                                        <h2 className="text-white text-3xl font-bold">
+                                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 mb-4">
 
-                                            Your Order
+                                            <Crown
+                                                size={16}
+                                            />
 
-                                        </h2>
+                                            Luxury Order
 
-                                        <p className="text-gray-400 mt-1">
+                                        </div>
+
+                                       <div className="flex items-start justify-between gap-4">
+
+    <div>
+
+        <h2 className="text-white text-3xl md:text-4xl font-bold">
+
+            Your Cart
+
+        </h2>
+
+        <div className="mt-4 inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full text-sm text-violet-300">
+
+            {cart.length} Items
+            •
+            ₹{total.toFixed(2)}
+
+        </div>
+
+    </div>
+
+    {
+        fixedMode && (
+
+            <button
+                onClick={() =>
+                    setShowCart(
+                        false
+                    )
+                }
+                className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 px-5 py-3 rounded-2xl text-red-400 font-semibold duration-300"
+            >
+
+                ✕
+
+            </button>
+        )
+    }
+
+</div>
+<div className="mt-4 inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full text-sm text-violet-300">
+
+    {cart.length} Items
+    •
+    ₹{total.toFixed(2)}
+
+</div>
+
+                                        <p className="text-gray-400 mt-2">
 
                                             {
                                                 cart.length
-                                            } items
+                                            }
+                                            {" "}
+                                            items selected
+
                                         </p>
 
                                     </div>
 
-                                    <button
-                                        onClick={() =>
-                                            setShowCart(
-                                                false
-                                            )
-                                        }
-                                        className="w-12 h-12 rounded-2xl bg-white/5 hover:bg-red-500/20 flex items-center justify-center duration-300"
-                                    >
+                                    {/* Close */}
+                                   {
+    !fixedMode && (
 
-                                        <X
-                                            size={28}
-                                            className="text-white"
-                                        />
+        <button
+            onClick={() =>
+                setShowCart(
+                    false
+                )
+            }
+            className="w-14 h-14 rounded-[20px] bg-white/5 hover:bg-red-500/20 border border-white/10 flex items-center justify-center duration-300"
+        >
 
-                                    </button>
+            <X
+                size={28}
+                className="text-white"
+            />
+
+        </button>
+    )
+}
 
                                 </div>
 
                             </div>
 
                             {/* Body */}
-                            <div className="flex-1 overflow-y-auto px-5 py-5">
-
-                                {
-                                    cart.length ===
-                                    0
+                            <div className="flex-1 overflow-y-auto px-6 md:px-8 py-7 pr-3 scrollbar-thin scrollbar-thumb-violet-500/70 scrollbar-track-transparent hover:scrollbar-thumb-violet-400 scroll-smooth">
+                                                                {
+                                    cart.length === 0
 
                                     ? (
 
-                                        <div className="h-full flex flex-col items-center justify-center text-center">
+                                        <div className="h-full flex flex-col items-center justify-center text-center px-8">
 
-                                            <ShoppingBag
-                                                size={70}
-                                                className="text-violet-400 mb-5"
-                                            />
+                                            <div className="w-32 h-32 rounded-full bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-8">
 
-                                            <h2 className="text-white text-3xl font-bold">
+                                                <ShoppingBag
+                                                    size={60}
+                                                    className="text-violet-400"
+                                                />
 
-                                                Empty Cart 🍽️
+                                            </div>
+
+                                            <h2 className="text-white text-3xl md:text-4xl font-bold">
+
+                                                Empty Cart
 
                                             </h2>
 
-                                            <p className="text-gray-400 mt-3">
+                                            <p className="text-gray-400 mt-5 text-lg leading-8 max-w-[320px]">
 
-                                                Add delicious food
-                                                to continue
+                                                Add delicious premium meals
+                                                to begin your luxury dining
+                                                experience.
+
                                             </p>
 
                                         </div>
@@ -296,7 +395,7 @@ Order ID: #${data.order_id}`
 
                                     : (
 
-                                        <div className="space-y-5">
+                                       <div className="space-y-7 pb-6">
 
                                             {
                                                 cart.map(
@@ -311,31 +410,51 @@ item.image
 
                                                             <motion.div
                                                                 layout
-                                                                key={item.id}
-                                                                className="bg-white/5 border border-white/10 rounded-[30px] p-4 backdrop-blur-xl"
-                                                            >
+                                                                key={
+                                                                    item.id
+                                                                }
+                                                                whileHover={{
+                                                                    y: -3
+                                                                }}
+className="group bg-white/[0.04] border border-white/10 rounded-[35px] p-6 md:p-7 backdrop-blur-2xl hover:border-violet-500/20 duration-500"                                                            >
 
-                                                                <div className="flex gap-4">
+                                                               <div className="flex flex-col sm:flex-row gap-6 md:gap-7 items-start">
 
                                                                     {/* Image */}
-                                                                    <img
-                                                                        src={image}
-                                                                        onError={(e) => {
-                                                                            e.target.src =
+                                                                    <div className="relative overflow-hidden rounded-[28px]">
+
+                                                                        <img
+                                                                            src={
+                                                                                image
+                                                                            }
+                                                                            onError={(e)=>{
+
+                                                                                e.target.src =
                                                                                 FALLBACK_IMAGE;
-                                                                        }}
-                                                                        alt=""
-                                                                        className="w-28 h-28 rounded-3xl object-cover"
-                                                                    />
+                                                                            }}
+                                                                            alt=""
+                                                                                       className="w-full sm:w-36 h-[220px] sm:h-36 md:w-40 md:h-40 object-cover group-hover:scale-110 duration-[3000ms]"                                                                       />
+
+                                                                    </div>
 
                                                                     {/* Content */}
                                                                     <div className="flex-1">
 
-                                                                        <div className="flex justify-between">
+                                                                        <div className="flex justify-between items-start">
 
                                                                             <div>
 
-                                                                                <h3 className="text-white text-lg font-bold capitalize">
+                                                                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-sm mb-3">
+
+                                                                                    <Sparkles
+                                                                                        size={14}
+                                                                                    />
+
+                                                                                    Premium
+
+                                                                                </div>
+
+                                                                                <h3 className="text-white text-2xl font-bold capitalize">
 
                                                                                     {
                                                                                         item.food_name
@@ -343,7 +462,7 @@ item.image
 
                                                                                 </h3>
 
-                                                                                <p className="text-violet-400 mt-1 font-semibold">
+                                                                                <p className="text-violet-400 font-semibold mt-2 text-lg">
 
                                                                                     ₹
                                                                                     {
@@ -354,16 +473,18 @@ item.image
 
                                                                             </div>
 
+                                                                            {/* Delete */}
                                                                             <button
                                                                                 onClick={() =>
                                                                                     decreaseQty(
                                                                                         item.id
                                                                                     )
                                                                                 }
+                                                                                className="w-11 h-11 rounded-2xl bg-red-500/10 hover:bg-red-500/20 flex items-center justify-center duration-300"
                                                                             >
 
                                                                                 <Trash2
-                                                                                    className="text-red-400 hover:text-red-300 duration-300"
+                                                                                    className="text-red-400"
                                                                                     size={20}
                                                                                 />
 
@@ -371,10 +492,11 @@ item.image
 
                                                                         </div>
 
-                                                                        {/* Qty */}
-                                                                        <div className="flex justify-between items-center mt-5">
+                                                                        {/* Bottom */}
+                                                                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 mt-7">
 
-                                                                            <div className="flex items-center gap-3 bg-white/5 rounded-2xl px-3 py-2">
+                                                                            {/* Qty */}
+                                                                            <div className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-[20px] px-3 py-2">
 
                                                                                 <button
                                                                                     onClick={() =>
@@ -382,7 +504,7 @@ item.image
                                                                                             item.id
                                                                                         )
                                                                                     }
-                                                                                    className="w-9 h-9 rounded-xl bg-red-500 hover:scale-105 duration-300 text-white flex items-center justify-center"
+                                                                                    className="w-10 h-10 rounded-2xl bg-red-500 hover:scale-105 duration-300 text-white flex items-center justify-center"
                                                                                 >
 
                                                                                     <Minus
@@ -391,7 +513,7 @@ item.image
 
                                                                                 </button>
 
-                                                                                <span className="text-white font-bold text-lg w-8 text-center">
+                                                                                <span className="text-white font-bold text-xl w-8 text-center">
 
                                                                                     {
                                                                                         item.quantity
@@ -405,7 +527,7 @@ item.image
                                                                                             item.id
                                                                                         )
                                                                                     }
-                                                                                    className="w-9 h-9 rounded-xl bg-green-500 hover:scale-105 duration-300 text-white flex items-center justify-center"
+                                                                                    className="w-10 h-10 rounded-2xl bg-green-500 hover:scale-105 duration-300 text-white flex items-center justify-center"
                                                                                 >
 
                                                                                     <Plus
@@ -416,7 +538,8 @@ item.image
 
                                                                             </div>
 
-                                                                            <h2 className="text-white text-xl font-bold">
+                                                                            {/* Total */}
+                                                                            <h2 className="text-white text-2xl font-bold">
 
                                                                                 ₹
                                                                                 {
@@ -447,86 +570,93 @@ item.image
                                 }
 
                             </div>
-
-                            {/* Footer */}
+                                                        {/* Footer */}
                             {
                                 cart.length > 0 && (
 
-                                    <div className="border-t border-white/10 p-6 bg-[#1f1830]">
+                                    <div className="border-t border-white/10 p-6 bg-[#1b152a]/95 backdrop-blur-3xl sticky bottom-0 z-20 shadow-[0_-10px_40px_rgba(0,0,0,0.35)]">
 
                                         {/* Payment */}
-                                        <label className="text-white font-medium">
+                                        <div className="mb-6">
 
-                                            Payment Method
+                                            <label className="text-white font-semibold text-lg">
 
-                                        </label>
+                                                Payment Method
 
-                                        <select
-                                            value={payment}
-                                            onChange={(e) =>
-                                                setPayment(
-                                                    e.target.value
-                                                )
-                                            }
-                                            className="w-full mt-3 bg-[#312B45] border border-white/10 rounded-2xl p-4 text-white outline-none"
-                                        >
+                                            </label>
 
-                                            <option>
-                                                UPI
-                                            </option>
+                                            <select
+                                                value={payment}
+                                                onChange={(e)=>
+                                                    setPayment(
+                                                        e.target.value
+                                                    )
+                                                }
+                                                className="w-full mt-4 bg-[#231b38] border border-white/10 rounded-[22px] p-5 text-white outline-none focus:border-violet-500 duration-300"
+                                            >
 
-                                            <option>
-                                                Card
-                                            </option>
+                                                <option>
+                                                    UPI
+                                                </option>
 
-                                            <option>
-                                                Cash
-                                            </option>
+                                                <option>
+                                                    Card
+                                                </option>
 
-                                            <option>
-                                                Net Banking
-                                            </option>
+                                                <option>
+                                                    Cash
+                                                </option>
 
-                                        </select>
+                                                <option>
+                                                    Net Banking
+                                                </option>
+
+                                            </select>
+
+                                        </div>
 
                                         {/* Summary */}
-                                        <div className="mt-6 space-y-3">
+                                        <div className="bg-white/[0.04] border border-white/10 rounded-[30px] p-5 space-y-4">
 
-                                            <div className="flex justify-between text-gray-400">
+                                            <div className="flex justify-between text-gray-400 text-lg">
 
                                                 <span>
                                                     Subtotal
                                                 </span>
 
                                                 <span>
+
                                                     ₹
                                                     {
                                                         subtotal.toFixed(
                                                             2
                                                         )
                                                     }
+
                                                 </span>
 
                                             </div>
 
-                                            <div className="flex justify-between text-gray-400">
+                                            <div className="flex justify-between text-gray-400 text-lg">
 
                                                 <span>
                                                     GST (5%)
                                                 </span>
 
                                                 <span>
+
                                                     ₹
                                                     {
                                                         tax.toFixed(
                                                             2
                                                         )
                                                     }
+
                                                 </span>
 
                                             </div>
 
-                                            <div className="flex justify-between text-white text-2xl font-bold pt-3 border-t border-white/10">
+                                            <div className="flex justify-between text-white text-3xl font-bold pt-4 border-t border-white/10">
 
                                                 <span>
                                                     Total
@@ -540,30 +670,52 @@ item.image
                                                             2
                                                         )
                                                     }
+
                                                 </span>
 
                                             </div>
 
                                         </div>
 
-                                        {/* Order */}
-                                        <button
-                                            onClick={
-                                                handleOrder
-                                            }
-                                            disabled={
-                                                loading
-                                            }
-                                            className="w-full mt-6 bg-gradient-to-r from-violet-600 to-purple-700 hover:from-violet-500 hover:to-purple-600 py-5 rounded-2xl text-white text-lg font-bold shadow-[0_0_30px_rgba(124,58,237,0.35)] hover:scale-[1.02] duration-300"
-                                        >
+                                        {/* Buttons */}
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
 
-                                            {
-                                                loading
-                                                ? "Placing Order..."
-                                                : "Proceed Order →"
-                                            }
+                                            <button
+                                                onClick={
+                                                    clearCart
+                                                }
+                                                className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 py-5 rounded-[22px] text-red-400 font-bold duration-300"
+                                            >
 
-                                        </button>
+                                                Clear Cart
+
+                                            </button>
+
+                                            <motion.button
+                                                whileTap={{
+                                                    scale: 0.97
+                                                }}
+                                                whileHover={{
+                                                    scale: 1.02
+                                                }}
+                                                onClick={
+                                                    handleOrder
+                                                }
+                                                disabled={
+                                                    loading
+                                                }
+                                                className="bg-gradient-to-r from-violet-600 via-purple-700 to-fuchsia-700 hover:from-violet-500 hover:to-fuchsia-600 py-5 rounded-[22px] text-white text-lg font-bold shadow-[0_0_35px_rgba(124,58,237,0.35)] duration-300"
+                                            >
+
+                                                {
+                                                    loading
+                                                    ? "Ordering..."
+                                                    : "Place Order →"
+                                                }
+
+                                            </motion.button>
+
+                                        </div>
 
                                     </div>
                                 )

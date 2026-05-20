@@ -102,7 +102,7 @@ export default function AdminLayout({
 
         {
             name:
-                "Tables",
+                "Tablet",
 
             icon:
                 <TableProperties

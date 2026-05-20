@@ -11,7 +11,8 @@ import {
 
 import {
     Link,
-    NavLink
+    NavLink,
+    useNavigate
 } from "react-router-dom";
 
 import {
@@ -21,6 +22,9 @@ import {
 
 export default function Navbar() {
 
+    const navigate =
+        useNavigate();
+
     const [openMenu,
         setOpenMenu] =
         useState(false);
@@ -28,6 +32,21 @@ export default function Navbar() {
     const [scrolled,
         setScrolled] =
         useState(false);
+
+    const [search,
+        setSearch] =
+        useState("");
+
+    const [foods,
+        setFoods] =
+        useState([]);
+
+    const [showResults,
+        setShowResults] =
+        useState(false);
+
+    const API_URL =
+"https://restaurant-jagath.infinityfreeapp.com/restaurant-api/menu/getFoods.php";
 
     useEffect(() => {
 
@@ -52,14 +71,82 @@ export default function Navbar() {
 
     }, []);
 
-    const navItems = [
-        ["Home", "/"],
-        ["Menu", "/breakfast"],
-        ["About Us", "/about"],
-        ["Reserve Table", "/reservation"],
-        ["Track Order", "/order-status"],
-        ["Feedback", "/feedback"]
-    ];
+    useEffect(() => {
+
+        fetchFoods();
+
+    }, []);
+
+    const fetchFoods =
+        async () => {
+
+            try {
+
+                const response =
+                    await fetch(
+                        API_URL
+                    );
+
+                const data =
+                    await response.json();
+
+                setFoods(
+                    Array.isArray(
+                        data
+                    )
+                        ? data.filter(
+                            item =>
+                                item.available ===
+                                "1"
+                        )
+                        : []
+                );
+
+            } catch(error){
+
+                console.log(
+                    error
+                );
+            }
+        };
+
+    const filteredResults =
+        foods.filter(
+            item =>
+                item.food_name
+                    .toLowerCase()
+                    .includes(
+                        search.toLowerCase()
+                    )
+        )
+        .slice(0, 6);
+
+    const handleSearchNavigation =
+        (item) => {
+
+            const category =
+                item.category
+                    .toLowerCase();
+
+            navigate(
+                `/${category}`
+            );
+
+            setSearch("");
+
+            setShowResults(
+                false
+            );
+        };
+
+  const navItems = [
+    ["Home", "/"],
+    ["Menu", "#menu"],
+    ["About Us", "/about"],
+    ["Reserve Table", "/reservation"],
+    ["Track Order", "/order-status"],
+    ["Feedback", "/feedback"]
+];
 
     const navStyle =
         ({ isActive }) =>
@@ -114,22 +201,16 @@ export default function Navbar() {
                     className="flex items-center gap-4 shrink-0 group"
                 >
 
-                    {/* Crown */}
                     <motion.div
                         whileHover={{
                             rotate: 8,
                             scale: 1.08
                         }}
-                        transition={{
-                            duration: 0.3
-                        }}
                         className="relative w-14 h-14 rounded-3xl bg-gradient-to-br from-yellow-400 via-amber-500 to-yellow-600 flex items-center justify-center shadow-[0_0_40px_rgba(251,191,36,0.4)] overflow-hidden"
                     >
 
-                        {/* Glow */}
                         <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 duration-500" />
 
-                        {/* SVG Crown */}
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 24 24"
@@ -141,7 +222,6 @@ export default function Navbar() {
 
                     </motion.div>
 
-                    {/* Brand */}
                     <div>
 
                         <h1 className="text-white text-xl md:text-2xl font-bold tracking-wide">
@@ -159,8 +239,7 @@ export default function Navbar() {
                     </div>
 
                 </Link>
-
-                {/* DESKTOP MENU */}
+                                {/* DESKTOP MENU */}
                 <ul className="hidden xl:flex items-center gap-2">
 
                     {
@@ -174,16 +253,74 @@ export default function Navbar() {
                                     key={name}
                                 >
 
-                                    <NavLink
-                                        to={path}
-                                        className={
-                                            navStyle
-                                        }
-                                    >
+                                 {
+    name === "Menu"
 
-                                        {name}
+    ? (
 
-                                    </NavLink>
+        <button
+           onClick={() => {
+
+    if(
+        window.location.pathname
+        !== "/"
+    ){
+
+        navigate(
+            "/#menu"
+        );
+
+        setTimeout(() => {
+
+            const section =
+                document.getElementById(
+                    "menu"
+                );
+
+            section?.scrollIntoView({
+                behavior:
+                "smooth"
+            });
+
+        }, 300);
+
+    }
+
+    else {
+
+        const section =
+            document.getElementById(
+                "menu"
+            );
+
+        section?.scrollIntoView({
+            behavior:
+            "smooth"
+        });
+    }
+}}
+            className="relative px-5 py-3 rounded-2xl font-medium transition-all duration-500 text-[15px] text-gray-300 hover:text-white hover:bg-white/5"
+        >
+
+            Menu
+
+        </button>
+
+    ) : (
+
+        <NavLink
+            to={path}
+            className={
+                navStyle
+            }
+        >
+
+            {name}
+
+        </NavLink>
+
+    )
+}
 
                                 </motion.li>
                             )
@@ -196,39 +333,93 @@ export default function Navbar() {
                 <div className="hidden lg:flex items-center gap-5">
 
                     {/* Search */}
-                    <motion.div
-                        whileHover={{
-                            scale: 1.02
-                        }}
-                        className="hidden xl:flex items-center bg-white/5 border border-white/10 px-5 py-3 rounded-2xl w-[280px] hover:border-violet-500/40 transition-all duration-500"
-                    >
+                    <div className="relative">
 
-                        <Search
-                            size={18}
-                            className="text-violet-400"
-                        />
+                        <motion.div
+                            whileHover={{
+                                scale: 1.02
+                            }}
+                            className="hidden xl:flex items-center bg-white/5 border border-white/10 px-5 py-3 rounded-2xl w-[300px] hover:border-violet-500/40 transition-all duration-500"
+                        >
 
-                        <input
-                            type="text"
-                            placeholder="Search delicious food..."
-                            className="bg-transparent outline-none text-white placeholder:text-gray-500 ml-4 w-full"
-                        />
+                            <Search
+                                size={18}
+                                className="text-violet-400"
+                            />
 
-                    </motion.div>
+                            <input
+                                type="text"
+                                value={search}
+                                onFocus={() =>
+                                    setShowResults(
+                                        true
+                                    )
+                                }
+                                onChange={(e)=>
+                                    setSearch(
+                                        e.target.value
+                                    )
+                                }
+                                placeholder="Search delicious food..."
+                                className="bg-transparent outline-none text-white placeholder:text-gray-500 ml-4 w-full"
+                            />
 
-                    {/* CTA */}
-                    <motion.div
-                        whileHover={{
-                            scale: 1.05
-                        }}
-                        whileTap={{
-                            scale: 0.95
-                        }}
-                    >
+                        </motion.div>
 
-                       
+                        {/* Search Results */}
+                        {
+                            showResults &&
+                            search &&
+                            filteredResults.length > 0 && (
 
-                    </motion.div>
+                                <div className="absolute top-[70px] right-0 w-[320px] bg-[#1c152d]/95 backdrop-blur-2xl border border-white/10 rounded-[30px] p-3 shadow-2xl z-[99999]">
+
+                                    {
+                                        filteredResults.map(
+                                            item => (
+
+                                                <button
+                                                    key={
+                                                        item.id
+                                                    }
+                                                    onClick={() =>
+                                                        handleSearchNavigation(
+                                                            item
+                                                        )
+                                                    }
+                                                    className="w-full text-left p-4 rounded-2xl hover:bg-white/5 duration-300 border border-transparent hover:border-violet-500/20"
+                                                >
+
+                                                    <h3 className="text-white font-semibold">
+
+                                                        {
+                                                            item.food_name
+                                                        }
+
+                                                    </h3>
+
+                                                    <p className="text-gray-400 text-sm mt-1">
+
+                                                        {
+                                                            item.category
+                                                        }
+                                                        {" • "}
+                                                        {
+                                                            item.section
+                                                        }
+
+                                                    </p>
+
+                                                </button>
+                                            )
+                                        )
+                                    }
+
+                                </div>
+                            )
+                        }
+
+                    </div>
 
                 </div>
 
@@ -254,8 +445,7 @@ export default function Navbar() {
                 </motion.button>
 
             </div>
-
-            {/* MOBILE MENU */}
+                        {/* MOBILE MENU */}
             <AnimatePresence>
 
                 {
@@ -283,18 +473,87 @@ export default function Navbar() {
                             <div className="px-5 py-6">
 
                                 {/* Mobile Search */}
-                                <div className="flex items-center bg-white/5 border border-white/10 px-5 py-4 rounded-2xl">
+                                <div className="relative">
 
-                                    <Search
-                                        size={20}
-                                        className="text-violet-400"
-                                    />
+                                    <div className="flex items-center bg-white/5 border border-white/10 px-5 py-4 rounded-2xl">
 
-                                    <input
-                                        type="text"
-                                        placeholder="Search food..."
-                                        className="bg-transparent outline-none text-white placeholder:text-gray-500 w-full ml-4"
-                                    />
+                                        <Search
+                                            size={20}
+                                            className="text-violet-400"
+                                        />
+
+                                        <input
+                                            type="text"
+                                            value={search}
+                                            onFocus={() =>
+                                                setShowResults(
+                                                    true
+                                                )
+                                            }
+                                            onChange={(e)=>
+                                                setSearch(
+                                                    e.target.value
+                                                )
+                                            }
+                                            placeholder="Search food..."
+                                            className="bg-transparent outline-none text-white placeholder:text-gray-500 w-full ml-4"
+                                        />
+
+                                    </div>
+
+                                    {/* Mobile Results */}
+                                    {
+                                        showResults &&
+                                        search &&
+                                        filteredResults.length > 0 && (
+
+                                            <div className="mt-4 bg-white/5 border border-white/10 rounded-[30px] p-3">
+
+                                                {
+                                                    filteredResults.map(
+                                                        item => (
+
+                                                            <button
+                                                                key={
+                                                                    item.id
+                                                                }
+                                                                onClick={() => {
+
+                                                                    handleSearchNavigation(
+                                                                        item
+                                                                    );
+
+                                                                    setOpenMenu(
+                                                                        false
+                                                                    );
+                                                                }}
+                                                                className="w-full text-left p-4 rounded-2xl hover:bg-white/5 duration-300"
+                                                            >
+
+                                                                <h3 className="text-white font-semibold">
+
+                                                                    {
+                                                                        item.food_name
+                                                                    }
+
+                                                                </h3>
+
+                                                                <p className="text-gray-400 text-sm mt-1">
+
+                                                                    {
+                                                                        item.category
+                                                                    }
+
+                                                                </p>
+
+                                                            </button>
+                                                        )
+                                                    )
+                                                }
+
+                                            </div>
+                                        )
+                                    }
 
                                 </div>
 
@@ -320,17 +579,83 @@ export default function Navbar() {
                                                     key={name}
                                                 >
 
-                                                    <NavLink
-                                                        to={path}
-                                                        onClick={() =>
-                                                            setOpenMenu(false)
-                                                        }
-                                                        className={navStyle}
-                                                    >
+                                                    {
+    name === "Menu"
 
-                                                        {name}
+    ? (
 
-                                                    </NavLink>
+        <button
+            onClick={() => {
+
+    setOpenMenu(
+        false
+    );
+
+    if(
+        window.location.pathname
+        !== "/"
+    ){
+
+        navigate(
+            "/#menu"
+        );
+
+        setTimeout(() => {
+
+            const section =
+                document.getElementById(
+                    "menu"
+                );
+
+            section?.scrollIntoView({
+                behavior:
+                "smooth"
+            });
+
+        }, 300);
+
+    }
+
+    else {
+
+        const section =
+            document.getElementById(
+                "menu"
+            );
+
+        section?.scrollIntoView({
+            behavior:
+            "smooth"
+        });
+    }
+}}
+            className="w-full text-left relative px-5 py-3 rounded-2xl font-medium text-gray-300 hover:text-white hover:bg-white/5"
+        >
+
+            Menu
+
+        </button>
+
+    ) : (
+
+        <NavLink
+            to={path}
+            onClick={() =>
+                setOpenMenu(
+                    false
+                )
+            }
+            className={
+                navStyle
+            }
+        >
+
+            {name}
+
+        </NavLink>
+
+    )
+}
 
                                                 </motion.li>
                                             )
@@ -338,9 +663,6 @@ export default function Navbar() {
                                     }
 
                                 </ul>
-
-                                {/* Mobile CTA */}
-                                
 
                             </div>
 
